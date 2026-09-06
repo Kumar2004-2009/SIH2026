@@ -11,30 +11,33 @@ import {
 } from 'recharts';
 import { Building2, Layers } from 'lucide-react';
 import { formatCurrency } from '../../api/client';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white p-3 rounded-md border border-[#E4E0D6] shadow-sm text-xs space-y-1.5 min-w-[210px]">
-        <div className="font-semibold text-[#1C1B22] border-b border-[#E4E0D6] pb-1 flex items-center justify-between font-serif">
+      <div className="bg-th-surface-el p-3 rounded-lg border border-th-border shadow-elevated text-xs space-y-1.5 min-w-[210px] z-50">
+        <div className="font-semibold text-th-text-primary border-b border-th-border pb-1.5 flex items-center justify-between font-serif">
           <span>{data.business_unit}</span>
-          <span className="text-[10px] text-[#0F5C42] font-mono font-medium">BU Exposure</span>
+          <span className="text-[10px] text-th-brand font-mono font-medium">BU Exposure</span>
         </div>
-        <div className="flex justify-between items-center text-[#4A4852] pt-0.5">
+        <div className="flex justify-between items-center text-th-text-secondary pt-1">
           <span>Total EAL:</span>
-          <span className="font-mono font-bold text-[#1C1B22] tabular-nums">{formatCurrency(data.total_EAL_usd)}</span>
+          <span className="font-mono font-bold text-th-text-primary tabular-nums">{formatCurrency(data.total_EAL_usd)}</span>
         </div>
-        <div className="flex justify-between items-center text-[#4A4852]">
+        <div className="flex justify-between items-center text-th-text-secondary">
           <span>VaR 95% Bound:</span>
-          <span className="font-mono font-semibold text-[#B8752B] tabular-nums">
+          <span className="font-mono font-semibold text-th-warning tabular-nums">
             {formatCurrency(data.total_VaR95_usd_upper_bound || data.total_VaR95_usd)}
           </span>
         </div>
         {data.top_contributors && (
-          <div className="pt-1 text-[11px] text-[#7E7C88] border-t border-[#E4E0D6]">
-            <span className="font-medium">Top Contributors: </span>
-            <span className="text-[#4A4852] font-mono">
+          <div className="pt-2 mt-1 text-[11px] text-th-text-muted border-t border-th-border">
+            <span className="font-medium text-th-text-secondary">Top Contributors: </span>
+            <span className="font-mono">
               {Array.isArray(data.top_contributors)
                 ? data.top_contributors.join(', ')
                 : String(data.top_contributors)}
@@ -50,37 +53,34 @@ const CustomTooltip = ({ active, payload }) => {
 export const BusinessUnitChart = ({ data = [], loading, error, onRetry }) => {
   if (loading) {
     return (
-      <div className="bg-white rounded-md p-6 border border-[#E4E0D6] h-[360px] flex flex-col justify-center items-center">
-        <div className="w-7 h-7 rounded-full border-2 border-[#0F5C42] border-t-transparent animate-spin mb-3"></div>
-        <p className="text-xs text-[#7E7C88] font-medium">Aggregating Business Unit Risk Exposures...</p>
-      </div>
+      <Card className="h-[360px] flex flex-col justify-center items-center p-6">
+        <div className="w-7 h-7 rounded-full border-2 border-th-brand border-t-transparent animate-spin mb-3"></div>
+        <p className="text-sm text-th-text-muted font-medium">Aggregating Business Unit Risk Exposures...</p>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-md p-6 border border-[#A32B2B]/30 text-center h-[360px] flex flex-col justify-center items-center">
-        <p className="text-xs font-semibold text-[#A32B2B] mb-1 font-serif">Error loading Business Unit Risk</p>
-        <p className="text-xs text-[#A32B2B]/90 mb-3">{error}</p>
+      <Card className="h-[360px] flex flex-col justify-center items-center p-6 border-th-danger/30 bg-th-danger-tint">
+        <p className="text-sm font-semibold text-th-danger mb-2 font-serif">Error loading Business Unit Risk</p>
+        <p className="text-xs text-th-danger/90 mb-4 text-center max-w-sm">{error}</p>
         {onRetry && (
-          <button
-            onClick={onRetry}
-            className="px-3 py-1 text-xs font-medium rounded bg-[#A32B2B] text-white hover:bg-[#852222]"
-          >
+          <Button onClick={onRetry} variant="danger" size="sm">
             Retry
-          </button>
+          </Button>
         )}
-      </div>
+      </Card>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white rounded-md p-6 border border-[#E4E0D6] text-center h-[360px] flex flex-col justify-center items-center">
-        <Layers className="w-7 h-7 text-[#7E7C88] mb-2" />
-        <p className="text-xs font-semibold text-[#1C1B22] font-serif">No Business Unit Data</p>
-        <p className="text-xs text-[#7E7C88]">Run the risk pipeline to populate metrics.</p>
-      </div>
+      <Card className="h-[360px] flex flex-col justify-center items-center p-6 text-center">
+        <Layers className="w-8 h-8 text-th-text-muted mb-3" />
+        <p className="text-sm font-semibold text-th-text-primary font-serif">No Business Unit Data</p>
+        <p className="text-xs text-th-text-muted mt-1">Run the risk pipeline to populate metrics.</p>
+      </Card>
     );
   }
 
@@ -88,24 +88,24 @@ export const BusinessUnitChart = ({ data = [], loading, error, onRetry }) => {
   const sortedData = [...data].sort((a, b) => (b.total_EAL_usd || 0) - (a.total_EAL_usd || 0));
 
   return (
-    <div className="bg-white rounded-md p-5 border border-[#E4E0D6] flex flex-col h-full justify-between">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded bg-[#EEF6F1] text-[#0F5C42]">
+    <Card className="flex flex-col h-full justify-between p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 rounded-lg bg-th-brand-tint text-th-brand shadow-soft">
             <Building2 className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-[#1C1B22] font-serif">
+            <h3 className="text-sm font-semibold text-th-text-primary font-serif">
               Risk Exposure by Business Unit
             </h3>
-            <p className="text-[11px] text-[#7E7C88]">
-              Annualized loss magnitude across business operational divisions
+            <p className="text-xs text-th-text-secondary mt-0.5">
+              Annualized loss magnitude across operational divisions
             </p>
           </div>
         </div>
-        <span className="text-[11px] font-mono text-[#0F5C42] bg-[#EEF6F1] px-2 py-0.5 rounded border border-[#E4E0D6]">
+        <Badge variant="brand">
           {sortedData.length} Units
-        </span>
+        </Badge>
       </div>
 
       <div className="w-full h-[270px] mt-2">
@@ -115,40 +115,37 @@ export const BusinessUnitChart = ({ data = [], loading, error, onRetry }) => {
             layout="vertical"
             margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#F0ECE1" horizontal={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
             <XAxis
               type="number"
               tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
-              stroke="#7E7C88"
+              stroke="var(--chart-axis)"
               fontSize={11}
               tickLine={false}
             />
             <YAxis
               type="category"
               dataKey="business_unit"
-              stroke="#2F2E36"
+              stroke="var(--chart-axis)"
               fontSize={11}
               tickLine={false}
               axisLine={false}
               width={110}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(238, 246, 241, 0.5)' }} />
-            <Bar dataKey="total_EAL_usd" radius={[0, 3, 3, 0]}>
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--surface-elevated)' }} />
+            <Bar dataKey="total_EAL_usd" radius={[0, 4, 4, 0]}>
               {sortedData.map((entry, index) => {
-                const fillColor =
-                  index === 0
-                    ? '#A32B2B' // Critical Tier 1
-                    : index === 1
-                    ? '#B8752B' // Moderate Tier 2
-                    : '#0F5C42'; // Low/Baseline
-                return <Cell key={`cell-${index}`} fill={fillColor} />;
+                const fillVar = 
+                  index === 0 ? 'var(--chart-bar-1)' :
+                  index === 1 ? 'var(--chart-bar-2)' :
+                  index === 2 ? 'var(--chart-bar-3)' :
+                  'var(--chart-bar-4)';
+                return <Cell key={`cell-${index}`} fill={fillVar} />;
               })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 };
-
-

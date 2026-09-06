@@ -1,6 +1,9 @@
 import React from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { formatCurrency } from '../../api/client';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 
 export const ExecutiveSummary = ({ data, loading, error, statusCode, onRetry }) => {
   // Support all snake_case, PascalCase, and total_ prefix variations defensively
@@ -23,22 +26,22 @@ export const ExecutiveSummary = ({ data, loading, error, statusCode, onRetry }) 
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-        <div className="md:col-span-6 bg-white border border-[#E4E0D6] rounded-md p-6 animate-pulse">
-          <div className="h-4 bg-[#E4E0D6] rounded w-1/3 mb-4"></div>
-          <div className="h-10 bg-[#E4E0D6] rounded w-2/3 mb-3"></div>
-          <div className="h-3 bg-[#F7F5F0] rounded w-1/2"></div>
-        </div>
-        <div className="md:col-span-3 bg-white border border-[#E4E0D6] rounded-md p-6 animate-pulse">
-          <div className="h-4 bg-[#E4E0D6] rounded w-1/3 mb-4"></div>
-          <div className="h-8 bg-[#E4E0D6] rounded w-2/3 mb-3"></div>
-          <div className="h-3 bg-[#F7F5F0] rounded w-1/2"></div>
-        </div>
-        <div className="md:col-span-3 bg-white border border-[#E4E0D6] rounded-md p-6 animate-pulse">
-          <div className="h-4 bg-[#E4E0D6] rounded w-1/3 mb-4"></div>
-          <div className="h-8 bg-[#E4E0D6] rounded w-2/3 mb-3"></div>
-          <div className="h-3 bg-[#F7F5F0] rounded w-1/2"></div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-fluid-sm">
+        <Card className="md:col-span-6 p-6 animate-pulse">
+          <div className="h-4 bg-th-border rounded w-1/3 mb-4"></div>
+          <div className="h-10 bg-th-border rounded w-2/3 mb-3"></div>
+          <div className="h-3 bg-th-surface-el rounded w-1/2"></div>
+        </Card>
+        <Card className="md:col-span-3 p-6 animate-pulse">
+          <div className="h-4 bg-th-border rounded w-1/3 mb-4"></div>
+          <div className="h-8 bg-th-border rounded w-2/3 mb-3"></div>
+          <div className="h-3 bg-th-surface-el rounded w-1/2"></div>
+        </Card>
+        <Card className="md:col-span-3 p-6 animate-pulse">
+          <div className="h-4 bg-th-border rounded w-1/3 mb-4"></div>
+          <div className="h-8 bg-th-border rounded w-2/3 mb-3"></div>
+          <div className="h-3 bg-th-surface-el rounded w-1/2"></div>
+        </Card>
       </div>
     );
   }
@@ -46,25 +49,26 @@ export const ExecutiveSummary = ({ data, loading, error, statusCode, onRetry }) 
   if (error) {
     const is503 = statusCode === 503 || error.includes('pipeline');
     return (
-      <div className="rounded-md border border-[#A32B2B]/30 bg-[#F9ECEC] p-6 text-center">
-        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#A32B2B]/10 text-[#A32B2B] mb-2">
+      <div className="rounded-xl border border-th-danger/30 bg-th-danger-tint p-6 text-center shadow-soft">
+        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-th-danger/10 text-th-danger mb-2">
           <ShieldAlert className="w-5 h-5" />
         </div>
-        <h3 className="text-sm font-semibold text-[#A32B2B] mb-1 font-serif">
+        <h3 className="text-sm font-semibold text-th-danger mb-1 font-serif">
           {is503 ? 'Risk Quantification Data Not Available' : 'Failed to Load Executive Risk Summary'}
         </h3>
-        <p className="text-xs text-[#A32B2B]/90 max-w-md mx-auto mb-4">
+        <p className="text-xs text-th-danger/90 max-w-md mx-auto mb-4">
           {is503
             ? 'Risk data is not computed yet. Run `python -m risk_engine.pipeline` in backend.'
             : error}
         </p>
         {onRetry && (
-          <button
+          <Button
             onClick={onRetry}
-            className="px-4 py-1.5 text-xs font-medium rounded bg-[#A32B2B] text-white hover:bg-[#852222] transition-colors"
+            variant="danger"
+            size="sm"
           >
             Retry Connection
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -72,122 +76,120 @@ export const ExecutiveSummary = ({ data, loading, error, statusCode, onRetry }) 
 
   return (
     <div className="space-y-6">
-      
+
       {/* Editorial Hero Header (No standalone eyebrow badge, serif authority) */}
-      <div className="border-b border-[#E4E0D6] pb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="border-b border-th-border pb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-[#1C1B22] font-serif tracking-tight">
+          <h1 className="text-fluid-h2 font-semibold text-th-text-primary font-serif tracking-tight">
             Cyber Risk Portfolio & Financial Quantifications
           </h1>
-          <p className="text-xs sm:text-sm text-[#4A4852] mt-1 max-w-3xl leading-relaxed">
+          <p className="text-sm text-th-text-secondary mt-2 max-w-3xl leading-relaxed">
             Annualized loss projections and capital solvency boundaries quantified via the Open FAIR™ framework across 10,000 Monte Carlo iterations.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3 text-xs text-[#7E7C88] shrink-0 font-mono">
+        <div className="flex items-center space-x-3 text-xs text-th-text-muted shrink-0 font-mono">
           <span>Model: Log-Normal / Beta-PERT</span>
           <span>•</span>
-          <span className="text-[#0F5C42] font-medium font-sans">10,000 Iterations</span>
+          <span className="text-th-brand font-medium font-sans">10,000 Iterations</span>
         </div>
       </div>
 
       {/* Differentiated Stat Cards Grid (EAL anchored prominent on left, Tail bounds on right) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-        
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-fluid-sm">
+
         {/* Prominent Primary Card: Expected Annual Loss (Cols 1-6) */}
-        <div className="md:col-span-6 bg-white border border-[#E4E0D6] rounded-md p-6 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 left-0 bottom-0 w-1 bg-[#0F5C42]" />
-          
+        <Card className="md:col-span-6 p-6 flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-0 left-0 bottom-0 w-1 bg-th-brand" />
+
           <div>
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-xs font-medium text-[#4A4852]">
+                <span className="text-xs font-medium text-th-text-secondary">
                   Expected Annual Loss (EAL)
                 </span>
-                <p className="text-[11px] text-[#7E7C88] mt-0.5">
+                <p className="text-[11px] text-th-text-muted mt-0.5">
                   Mean annual baseline exposure across all operational assets
                 </p>
               </div>
-              <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[#EEF6F1] text-[#0F5C42] border border-[#E4E0D6]">
+              <Badge variant="brand">
                 Baseline Mean
-              </span>
+              </Badge>
             </div>
 
-            <div className="my-4">
-              <div className="text-3xl sm:text-4xl font-bold font-serif text-[#1C1B22] tracking-tight tabular-nums">
+            <div className="my-5">
+              <div className="text-fluid-hero font-bold font-serif text-th-text-primary tracking-tight tabular-nums">
                 {formatCurrency(eal)}
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#E4E0D6] flex items-center justify-between text-xs text-[#4A4852]">
+          <div className="pt-4 border-t border-th-border flex items-center justify-between text-xs text-th-text-secondary">
             <span>12-month expected aggregate financial loss</span>
-            <span className="font-mono text-[#0F5C42] text-[11px] font-medium">Actuarial Mean</span>
+            <span className="font-mono text-th-brand text-[11px] font-medium">Actuarial Mean</span>
           </div>
-        </div>
+        </Card>
 
         {/* Tail Bound 1: VaR 95% (Cols 7-9) */}
-        <div className="md:col-span-3 bg-white border border-[#E4E0D6] rounded-md p-5 flex flex-col justify-between">
+        <Card className="md:col-span-3 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-xs font-medium text-[#4A4852]">
+                <span className="text-xs font-medium text-th-text-secondary">
                   Value at Risk (VaR 95%)
                 </span>
-                <p className="text-[11px] text-[#7E7C88] mt-0.5">
+                <p className="text-[11px] text-th-text-muted mt-0.5">
                   1-in-20 year tail loss boundary
                 </p>
               </div>
             </div>
 
-            <div className="my-3">
-              <div className="text-2xl sm:text-3xl font-semibold font-serif text-[#1C1B22] tracking-tight tabular-nums">
+            <div className="my-4">
+              <div className="text-3xl font-semibold font-serif text-th-text-primary tracking-tight tabular-nums">
                 {formatCurrency(var95)}
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#E4E0D6] flex items-center justify-between text-xs">
-            <span className="text-[#7E7C88]">Exceedance prob: 5%</span>
-            <span className="px-2 py-0.5 rounded font-mono text-[11px] font-medium bg-[#FAF3EB] text-[#B8752B] border border-[#E4E0D6]">
+          <div className="pt-3 border-t border-th-border flex items-center justify-between text-xs">
+            <span className="text-th-text-muted">Exceedance prob: 5%</span>
+            <Badge variant="warning">
               {var95Multiplier}x Base
-            </span>
+            </Badge>
           </div>
-        </div>
+        </Card>
 
         {/* Tail Bound 2: VaR 99% (Cols 10-12) */}
-        <div className="md:col-span-3 bg-white border border-[#E4E0D6] rounded-md p-5 flex flex-col justify-between">
+        <Card className="md:col-span-3 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-xs font-medium text-[#4A4852]">
+                <span className="text-xs font-medium text-th-text-secondary">
                   Value at Risk (VaR 99%)
                 </span>
-                <p className="text-[11px] text-[#7E7C88] mt-0.5">
+                <p className="text-[11px] text-th-text-muted mt-0.5">
                   1-in-100 year catastrophe bound
                 </p>
               </div>
             </div>
 
-            <div className="my-3">
-              <div className="text-2xl sm:text-3xl font-semibold font-serif text-[#1C1B22] tracking-tight tabular-nums">
+            <div className="my-4">
+              <div className="text-3xl font-semibold font-serif text-th-text-primary tracking-tight tabular-nums">
                 {formatCurrency(var99)}
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#E4E0D6] flex items-center justify-between text-xs">
-            <span className="text-[#7E7C88]">Exceedance prob: 1%</span>
-            <span className="px-2 py-0.5 rounded font-mono text-[11px] font-medium bg-[#F9ECEC] text-[#A32B2B] border border-[#E4E0D6]">
-              {var99Multiplier}x Catastrophe
-            </span>
+          <div className="pt-3 border-t border-th-border flex items-center justify-between text-xs">
+            <span className="text-th-text-muted">Exceedance prob: 1%</span>
+            <Badge variant="danger">
+              {var99Multiplier}x Cat
+            </Badge>
           </div>
-        </div>
+        </Card>
 
       </div>
 
     </div>
   );
 };
-
-

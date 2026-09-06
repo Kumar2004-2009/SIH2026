@@ -15,6 +15,8 @@ import {
   Award,
   Shield,
 } from 'lucide-react';
+import { Card, CardContent } from './components/ui/Card';
+import { Badge } from './components/ui/Badge';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -44,7 +46,7 @@ export function App() {
   const orgEal = orgRisk.data?.eal_usd ?? orgRisk.data?.EAL_usd ?? 0;
 
   return (
-    <div className="min-h-screen bg-[#F7F5F0] text-[#1C1B22] flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans theme-transition">
 
       {/* Top Navigation */}
       <Header
@@ -55,11 +57,11 @@ export function App() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-7">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-fluid-lg space-y-fluid-md">
 
         {/* TAB 1: EXECUTIVE OVERVIEW */}
         {activeTab === 'overview' && (
-          <div className="space-y-7">
+          <div className="space-y-fluid-md animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Top Stat Tiles & Hero */}
             <ExecutiveSummary
               data={orgRisk.data}
@@ -70,7 +72,7 @@ export function App() {
             />
 
             {/* Middle Section: Business Units & Controls ROI */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-fluid-md">
               <div className="lg:col-span-6">
                 <BusinessUnitChart
                   data={businessUnits.data}
@@ -89,21 +91,19 @@ export function App() {
                 />
               </div>
             </div>
-
-
           </div>
         )}
 
         {/* TAB 2: ASSET PORTFOLIO */}
         {activeTab === 'assets' && (
-          <div className="space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#E4E0D6] pb-4">
+          <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-th-border pb-4">
               <div>
-                <h2 className="text-xl font-semibold text-[#1C1B22] font-serif flex items-center gap-2">
-                  <Server className="w-5 h-5 text-[#0F5C42]" />
+                <h2 className="text-xl font-semibold text-th-text-primary font-serif flex items-center gap-2">
+                  <Server className="w-5 h-5 text-th-brand" />
                   <span>Asset Cyber Risk Portfolio & Threat Analysis</span>
                 </h2>
-                <p className="text-xs text-[#4A4852] mt-0.5">
+                <p className="text-xs text-th-text-secondary mt-0.5">
                   Comprehensive Open FAIR™ quantitative financial loss modeling across operational assets.
                 </p>
               </div>
@@ -121,20 +121,20 @@ export function App() {
 
         {/* TAB 3: CONTROLS & ROI */}
         {activeTab === 'controls' && (
-          <div className="space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#E4E0D6] pb-4">
+          <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-th-border pb-4">
               <div>
-                <h2 className="text-xl font-semibold text-[#1C1B22] font-serif flex items-center gap-2">
-                  <Award className="w-5 h-5 text-[#0F5C42]" />
+                <h2 className="text-xl font-semibold text-th-text-primary font-serif flex items-center gap-2">
+                  <Award className="w-5 h-5 text-th-brand" />
                   <span>Security Controls & Investment Return (ROSI)</span>
                 </h2>
-                <p className="text-xs text-[#4A4852] mt-0.5">
+                <p className="text-xs text-th-text-secondary mt-0.5">
                   Benchmarked risk reduction efficiency for defense-in-depth security engineering.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-fluid-md">
               <div className="lg:col-span-7">
                 <ControlsROIChart
                   data={controlsRoi.data}
@@ -144,24 +144,26 @@ export function App() {
                 />
               </div>
 
-              <div className="lg:col-span-5 bg-white rounded-md p-6 border border-[#E4E0D6] flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2 text-[#0F5C42]">
-                    <Zap className="w-4 h-4" />
-                    <h3 className="text-sm font-semibold text-[#1C1B22] font-serif">ROSI Formula & Actuarial Methodology</h3>
-                  </div>
-                  <div className="p-3.5 rounded bg-[#F7F5F0] border border-[#E4E0D6] text-xs font-mono text-[#1C1B22]">
-                    ROSI = (Risk Reduction USD) / (Control Cost USD)
-                  </div>
-                  <p className="text-xs text-[#4A4852] leading-relaxed">
-                    Controls are ranked by their ability to reduce annualized loss per dollar spent. A ROSI of <strong className="text-[#1C1B22]">3.5x</strong> indicates each $1 invested in security engineering mitigates $3.50 in Expected Annual Loss.
-                  </p>
-                </div>
+              <div className="lg:col-span-5 h-full">
+                <Card className="h-full flex flex-col justify-between">
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2 text-th-brand">
+                      <Zap className="w-5 h-5" />
+                      <h3 className="text-sm font-semibold text-th-text-primary font-serif">ROSI Formula & Actuarial Methodology</h3>
+                    </div>
+                    <div className="p-4 rounded-lg bg-th-surface-el border border-th-border text-sm font-mono text-th-text-primary flex items-center justify-center">
+                      ROSI = (Risk Reduction) / (Cost)
+                    </div>
+                    <p className="text-sm text-th-text-secondary leading-relaxed">
+                      Controls are ranked by their ability to reduce annualized loss per dollar spent. A ROSI of <strong className="text-th-text-primary font-semibold">3.5x</strong> indicates each $1 invested in security engineering mitigates $3.50 in Expected Annual Loss.
+                    </p>
+                  </CardContent>
 
-                <div className="mt-5 p-4 rounded bg-[#0F5C42] text-white text-xs">
-                  <span className="font-semibold block mb-1 font-serif">Next Step: </span>
-                  Switch to the <strong>Investment Optimizer</strong> tab to allocate a constrained security budget automatically using the exact Knapsack ILP algorithm.
-                </div>
+                  <div className="m-6 mt-0 p-4 rounded-lg bg-th-brand text-white text-sm">
+                    <span className="font-semibold block mb-1 font-serif text-white">Next Step: </span>
+                    <span className="text-white/90">Switch to the <strong>Investment Optimizer</strong> tab to allocate a constrained security budget automatically using the exact Knapsack ILP algorithm.</span>
+                  </div>
+                </Card>
               </div>
             </div>
           </div>
@@ -169,7 +171,7 @@ export function App() {
 
         {/* TAB 4: WHAT-IF OPTIMIZER */}
         {activeTab === 'optimizer' && (
-          <div className="space-y-5">
+          <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
             <WhatIfOptimizer orgEal={orgEal} />
           </div>
         )}
@@ -188,19 +190,37 @@ export function App() {
       <ChatWidget />
 
       {/* Modern Editorial Footer */}
-      <footer className="border-t border-[#E4E0D6] bg-white py-8 text-xs text-[#4A4852] mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-6 h-6 rounded bg-[#0F5C42] flex items-center justify-center text-white">
-              <Shield className="w-3.5 h-3.5" />
+      <footer className="border-t border-th-border bg-th-surface py-12 text-sm text-th-text-secondary mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start justify-between">
+            {/* Brand & Copyright */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-6 h-6 rounded bg-th-brand flex items-center justify-center text-white">
+                  <Shield className="w-3.5 h-3.5" />
+                </div>
+                <span className="font-semibold text-th-text-primary font-serif">CyberRisk Platform</span>
+              </div>
+              <p className="text-th-text-muted text-xs">
+                &copy; {new Date().getFullYear()} CyberRisk Inc. All rights reserved.
+              </p>
             </div>
-            <span className="font-semibold text-[#1C1B22] font-serif text-sm">CyberRisk Platform</span>
-          </div>
-          <span className="text-center sm:text-left text-[#7E7C88]">
-            SIH Problem Statement 26105 • AI-Powered Continuous FAIR Cyber Risk Quantification & ILP Optimizer
-          </span>
-          <div className="flex items-center space-x-2 text-[11px] font-medium text-[#0F5C42] bg-[#EEF6F1] px-3 py-1 rounded border border-[#E4E0D6] font-mono">
-            <span>Open FAIR™</span> • <span>Monte Carlo (N=10k)</span> • <span>Knapsack ILP</span>
+
+            {/* Resources Links */}
+            <div className="flex flex-col space-y-2 md:items-center">
+              <h4 className="text-th-text-primary font-semibold mb-1">Resources</h4>
+              <a href="#" className="hover:text-th-brand transition-colors text-xs">Documentation</a>
+              <a href="#" className="hover:text-th-brand transition-colors text-xs">Methodology</a>
+              <a href="#" className="hover:text-th-brand transition-colors text-xs">API Reference</a>
+            </div>
+
+            {/* Legal Links */}
+            <div className="flex flex-col space-y-2 md:items-end">
+              <h4 className="text-th-text-primary font-semibold mb-1">Legal</h4>
+              <a href="#" className="hover:text-th-brand transition-colors text-xs">Privacy Policy</a>
+              <a href="#" className="hover:text-th-brand transition-colors text-xs">Terms of Service</a>
+              <a href="#" className="hover:text-th-brand transition-colors text-xs">Security</a>
+            </div>
           </div>
         </div>
       </footer>
@@ -210,6 +230,3 @@ export function App() {
 }
 
 export default App;
-
-
-
