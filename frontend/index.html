@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
@@ -12,11 +12,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+  <script>
+    // Prevent flash of wrong theme on load
+    (function() {
+      var t = localStorage.getItem('cyberrisk-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 </head>
 
-<body class="bg-[#F7F5F0] text-[#1C1B22] antialiased selection:bg-[#0F5C42]/15 selection:text-[#0F5C42] min-h-screen">
+<body class="antialiased min-h-screen">
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

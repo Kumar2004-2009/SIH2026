@@ -20,6 +20,11 @@ import {
   Cell,
 } from 'recharts';
 import { getOptimizedPlan, formatCurrency, formatPercent, formatMultiplier } from '../../api/client';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export const WhatIfOptimizer = ({ orgEal = 0 }) => {
   const [budget, setBudget] = useState(500000);
@@ -89,8 +94,8 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
     const residualEal = optimizationResult.residual_eal_usd || Math.max(0, initialEal - totalRiskReduction);
 
     return [
-      { name: 'Initial EAL', eal: initialEal, fill: '#A32B2B' },
-      { name: 'Residual EAL', eal: residualEal, fill: '#3D7A52' },
+      { name: 'Initial EAL', eal: initialEal, fill: 'var(--danger)' },
+      { name: 'Residual EAL', eal: residualEal, fill: 'var(--success)' },
     ];
   })();
 
@@ -105,51 +110,51 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
   return (
     <div className="space-y-6">
       {/* Top Configuration Panel */}
-      <div className="bg-white rounded-md p-6 border border-[#E4E0D6] space-y-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#E4E0D6]">
+      <Card className="p-6 space-y-5 shadow-card">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-th-border">
           <div>
-            <div className="flex items-center space-x-2.5">
-              <div className="p-1.5 rounded bg-[#EEF6F1] text-[#0F5C42]">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-th-brand-tint text-th-brand shadow-soft">
                 <Sliders className="w-4 h-4" />
               </div>
-              <h2 className="text-base font-semibold text-[#1C1B22] font-serif">
+              <h2 className="text-lg font-semibold text-th-text-primary font-serif">
                 Security Investment Optimization Workbench
               </h2>
             </div>
-            <p className="text-xs text-[#4A4852] mt-0.5">
+            <p className="text-xs text-th-text-secondary mt-1">
               Integer Linear Programming (ILP) solver finding the optimal combination of mitigations under capital budget constraints.
             </p>
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-[#0F5C42] bg-[#EEF6F1] px-2.5 py-1 rounded border border-[#E4E0D6] font-mono flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-[#0F5C42]" />
+            <Badge variant="brand" className="font-mono flex items-center gap-1.5 py-1">
+              <Cpu className="w-3.5 h-3.5 text-th-brand" />
               Knapsack ILP Engine
-            </span>
+            </Badge>
           </div>
         </div>
 
         {/* Workflow Breadcrumbs */}
-        <div className="hidden sm:flex items-center space-x-2 text-xs text-[#4A4852] bg-[#F7F5F0] p-2.5 rounded border border-[#E4E0D6]">
-          <span className="font-semibold text-[#1C1B22]">1. Budget Allocation</span>
-          <ArrowRight className="w-3 h-3 text-[#7E7C88]" />
+        <div className="hidden sm:flex items-center space-x-2 text-xs text-th-text-secondary bg-th-surface-el p-3 rounded-lg border border-th-border">
+          <span className="font-semibold text-th-text-primary">1. Budget Allocation</span>
+          <ArrowRight className="w-3.5 h-3.5 text-th-text-muted" />
           <span>2. Constraints & Dependencies</span>
-          <ArrowRight className="w-3 h-3 text-[#7E7C88]" />
+          <ArrowRight className="w-3.5 h-3.5 text-th-text-muted" />
           <span>3. Global Optimization Solver</span>
-          <ArrowRight className="w-3 h-3 text-[#7E7C88]" />
-          <span className="text-[#0F5C42] font-semibold">4. Risk Reduction & ROSI</span>
+          <ArrowRight className="w-3.5 h-3.5 text-th-text-muted" />
+          <span className="text-th-brand font-semibold">4. Risk Reduction & ROSI</span>
         </div>
 
         {/* Interactive Controls Bar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center pt-1">
 
           {/* Budget Input & Slider (Cols 1-7) */}
-          <div className="lg:col-span-7 space-y-2.5">
+          <div className="lg:col-span-7 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-[#1C1B22]">
+              <label className="text-xs font-semibold text-th-text-primary">
                 Security Budget Allocation (USD)
               </label>
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1.5">
                 {presets.map((p) => (
                   <button
                     key={p.label}
@@ -157,11 +162,12 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                       setBudget(p.value);
                       runOptimizer(p.value, oneControlPerAsset);
                     }}
-                    className={`px-2.5 py-0.5 text-xs font-mono rounded transition-colors border ${
+                    className={twMerge(
+                      'px-3 py-1 text-xs font-mono rounded-full transition-colors border shadow-soft',
                       budget === p.value
-                        ? 'bg-[#0F5C42] text-white border-[#0F5C42] font-semibold'
-                        : 'bg-[#F7F5F0] text-[#4A4852] hover:text-[#1C1B22] border-[#E4E0D6]'
-                    }`}
+                        ? 'bg-th-brand text-white border-th-brand font-semibold'
+                        : 'bg-th-surface text-th-text-secondary hover:text-th-text-primary border-th-border'
+                    )}
                   >
                     {p.label}
                   </button>
@@ -169,7 +175,7 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
               <input
                 type="range"
                 min="10000"
@@ -177,24 +183,24 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                 step="10000"
                 value={budget}
                 onChange={handleSliderChange}
-                className="w-full h-2 bg-[#E4E0D6] rounded appearance-none cursor-pointer accent-[#0F5C42]"
+                className="w-full h-2.5 bg-th-border rounded-full appearance-none cursor-pointer accent-th-brand"
               />
               <div className="relative min-w-[140px]">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[#7E7C88]">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-th-text-muted">$</span>
                 <input
                   type="number"
                   min="0"
                   step="5000"
                   value={budget}
                   onChange={handleInputChange}
-                  className="w-full pl-6 pr-2 py-1 text-xs font-mono font-bold bg-[#F7F5F0] border border-[#E4E0D6] rounded text-[#1C1B22] focus:outline-none focus:bg-white focus:border-[#0F5C42] tabular-nums"
+                  className="w-full pl-6 pr-3 py-1.5 text-sm font-mono font-bold bg-th-surface-el border border-th-border rounded-lg text-th-text-primary focus:outline-none focus:bg-th-surface focus:border-th-accent focus:ring-1 focus:ring-th-accent tabular-nums transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Toggle Switch + Run Button (Cols 8-12) */}
-          <div className="lg:col-span-5 flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-3.5">
+          <div className="lg:col-span-5 flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-4 mt-2 lg:mt-0">
             {/* Modern Toggle Switch */}
             <label className="inline-flex items-center space-x-2.5 cursor-pointer select-none">
               <div className="relative">
@@ -204,41 +210,32 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                   onChange={(e) => setOneControlPerAsset(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-[#E4E0D6] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#C8C4B7] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0F5C42]"></div>
+                <div className="w-10 h-5.5 bg-th-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4.5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-th-border after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-th-brand"></div>
               </div>
-              <span className="text-xs text-[#1C1B22] font-medium">
+              <span className="text-xs text-th-text-primary font-medium">
                 Max 1 control / asset
               </span>
             </label>
 
             {/* Run Button */}
-            <button
+            <Button
               onClick={() => runOptimizer(budget, oneControlPerAsset)}
-              disabled={loading}
-              className="px-4 py-2 rounded bg-[#0F5C42] hover:bg-[#0B4733] text-white font-medium text-xs flex items-center space-x-1.5 shadow-xs transition-colors disabled:opacity-50"
+              isLoading={loading}
+              className="px-5 py-2"
             >
-              {loading ? (
-                <>
-                  <div className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  <span>Optimizing...</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-3 h-3 fill-current" />
-                  <span>Run Optimizer</span>
-                </>
-              )}
-            </button>
+              {!loading && <Play className="w-3.5 h-3.5 fill-current mr-2" />}
+              {loading ? 'Optimizing...' : 'Run Optimizer'}
+            </Button>
           </div>
 
         </div>
 
-      </div>
+      </Card>
 
       {error && (
-        <div className="p-4 rounded-md bg-[#F9ECEC] border border-[#A32B2B]/30 text-xs text-[#A32B2B] font-medium">
+        <Card className="p-4 bg-th-danger-tint border-th-danger/30 text-xs text-th-danger font-medium shadow-soft">
           {error}
-        </div>
+        </Card>
       )}
 
       {optimizationResult && (
@@ -247,82 +244,86 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
             {/* Allocated Cost */}
-            <div className="bg-white rounded-md p-5 border border-[#E4E0D6]">
-              <span className="text-xs text-[#7E7C88] font-medium">Optimal Allocated Cost</span>
-              <div className="text-2xl sm:text-3xl font-bold font-serif text-[#1C1B22] mt-1 tabular-nums">
+            <Card className="p-5">
+              <span className="text-xs text-th-text-secondary font-medium">Optimal Allocated Cost</span>
+              <div className="text-2xl sm:text-3xl font-bold font-serif text-th-text-primary mt-1.5 tabular-nums">
                 {formatCurrency(optimizationResult.total_cost_usd)}
               </div>
-              <div className="text-xs text-[#7E7C88] mt-1.5 flex items-center justify-between">
+              <div className="text-xs text-th-text-muted mt-2 flex items-center justify-between">
                 <span>Budget: {formatCurrency(optimizationResult.budget_usd)}</span>
-                <span className="text-[#0F5C42] font-mono font-medium">
+                <span className="text-th-brand font-mono font-medium">
                   {formatPercent(optimizationResult.budget_utilization_pct)}
                 </span>
               </div>
-            </div>
+            </Card>
 
             {/* Total Risk Reduction */}
-            <div className="bg-[#EEF6F1] rounded-md p-5 border border-[#E4E0D6]">
-              <span className="text-xs text-[#0F5C42] font-medium">Total Risk Reduction</span>
-              <div className="text-2xl sm:text-3xl font-bold font-serif text-[#0F5C42] mt-1 tabular-nums">
+            <Card className="p-5 bg-th-brand-tint border-th-brand/20">
+              <span className="text-xs text-th-brand font-medium">Total Risk Reduction</span>
+              <div className="text-2xl sm:text-3xl font-bold font-serif text-th-brand mt-1.5 tabular-nums">
                 {formatCurrency(optimizationResult.total_risk_reduction_usd)}
               </div>
-              <div className="text-xs text-[#0F5C42] mt-1.5 flex items-center gap-1 font-medium">
+              <div className="text-xs text-th-brand mt-2 flex items-center gap-1.5 font-medium">
                 <TrendingDown className="w-3.5 h-3.5" />
                 <span>Annualized Loss Mitigated</span>
               </div>
-            </div>
+            </Card>
 
             {/* Controls Implemented */}
-            <div className="bg-white rounded-md p-5 border border-[#E4E0D6]">
-              <span className="text-xs text-[#7E7C88] font-medium">Controls Implemented</span>
-              <div className="text-2xl sm:text-3xl font-bold font-serif text-[#1C1B22] mt-1 tabular-nums">
+            <Card className="p-5">
+              <span className="text-xs text-th-text-secondary font-medium">Controls Implemented</span>
+              <div className="text-2xl sm:text-3xl font-bold font-serif text-th-text-primary mt-1.5 tabular-nums">
                 {optimizationResult.n_actions_selected} Actions
               </div>
-              <div className="text-xs text-[#7E7C88] mt-1.5">
+              <div className="text-xs text-th-text-muted mt-2">
                 Across target critical assets
               </div>
-            </div>
+            </Card>
 
             {/* Residual EAL */}
-            <div className="bg-[#FAF3EB] rounded-md p-5 border border-[#E4E0D6]">
-              <span className="text-xs text-[#B8752B] font-medium">Residual EAL (Post-Mitigation)</span>
-              <div className="text-2xl sm:text-3xl font-bold font-serif text-[#B8752B] mt-1 tabular-nums">
+            <Card className="p-5 bg-th-warning-tint border-th-warning/20">
+              <span className="text-xs text-th-warning font-medium">Residual EAL (Post-Mitigation)</span>
+              <div className="text-2xl sm:text-3xl font-bold font-serif text-th-warning mt-1.5 tabular-nums">
                 {formatCurrency(optimizationResult.residual_eal_usd)}
               </div>
-              <div className="text-xs text-[#B8752B] mt-1.5">
+              <div className="text-xs text-th-warning mt-2">
                 Remaining portfolio risk
               </div>
-            </div>
+            </Card>
 
           </div>
 
           {/* Solid Emerald Callout Banner (Actuarial Value Guarantee) */}
-          <div className="bg-[#0F5C42] rounded-md p-6 text-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="space-y-1.5 max-w-xl">
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded bg-[#0B4733] text-[#FAF6ED] text-[11px] font-medium border border-[#3D7A52]">
-                <Sparkles className="w-3 h-3 text-[#9A7B2F]" />
+          <div className="bg-th-brand rounded-xl p-6 text-white shadow-elevated flex flex-col md:flex-row md:items-center justify-between gap-5 overflow-hidden relative">
+            <div className="absolute -right-10 -top-10 opacity-10 pointer-events-none">
+              <Cpu className="w-64 h-64" />
+            </div>
+            
+            <div className="space-y-2.5 max-w-xl relative z-10">
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-[11px] font-medium border border-white/20 backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5 text-th-accent-sec" />
                 <span>Exact Knapsack ILP Optimization</span>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold font-serif">
+              <h3 className="text-xl sm:text-2xl font-semibold font-serif">
                 Exact Knapsack vs Naive Greedy Selection
               </h3>
-              <p className="text-xs text-[#EDF5F2] leading-relaxed">
+              <p className="text-sm text-white/90 leading-relaxed max-w-lg">
                 At your ${formatCurrency(budget)} capital budget, the mathematical solver delivers an additional{' '}
-                <strong className="text-white font-semibold underline decoration-[#9A7B2F] decoration-2">
+                <strong className="text-white font-bold underline decoration-th-accent-sec decoration-2">
                   {formatCurrency(Math.max(0, ilpAdvantageUsd))}
                 </strong>{' '}
                 in risk reduction (+{formatPercent(ilpAdvantagePct)}) with zero increase in expenditure.
               </p>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="bg-[#0B4733] border border-[#3D7A52] rounded p-3 text-center min-w-[130px]">
-                <span className="text-[10px] text-[#A6CDBE] uppercase font-semibold block">Greedy Heuristic</span>
-                <span className="text-base font-bold font-mono text-white tabular-nums">{formatCurrency(greedyRiskRed)}</span>
+            <div className="flex items-center gap-3 shrink-0 relative z-10">
+              <div className="bg-black/20 border border-white/10 rounded-lg p-4 text-center min-w-[140px] backdrop-blur-md">
+                <span className="text-[10px] text-white/70 uppercase font-semibold block mb-1">Greedy Heuristic</span>
+                <span className="text-lg font-bold font-mono text-white/80 tabular-nums">{formatCurrency(greedyRiskRed)}</span>
               </div>
-              <div className="bg-white rounded p-3 text-center min-w-[140px] shadow-xs">
-                <span className="text-[10px] text-[#0F5C42] uppercase font-bold block">Knapsack ILP</span>
-                <span className="text-base font-bold font-mono text-[#0F5C42] tabular-nums">{formatCurrency(optimalRiskRed)}</span>
+              <div className="bg-white rounded-lg p-4 text-center min-w-[150px] shadow-soft">
+                <span className="text-[10px] text-th-brand uppercase font-bold block mb-1">Knapsack ILP</span>
+                <span className="text-lg font-bold font-mono text-th-brand tabular-nums">{formatCurrency(optimalRiskRed)}</span>
               </div>
             </div>
           </div>
@@ -331,23 +332,23 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
             {/* Left: Residual EAL Comparison (6 Cols) */}
-            <div className="lg:col-span-6 bg-white rounded-md p-5 border border-[#E4E0D6] flex flex-col justify-between">
+            <Card className="lg:col-span-6 p-5 flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-[#1C1B22] font-serif">
+                <h3 className="text-sm font-semibold text-th-text-primary font-serif">
                   Pre vs Post Mitigation Exposure
                 </h3>
-                <p className="text-[11px] text-[#7E7C88]">
+                <p className="text-xs text-th-text-secondary mt-0.5">
                   Expected Annual Loss before and after optimal control deployments
                 </p>
               </div>
 
-              <div className="h-52 w-full mt-3">
+              <div className="h-56 w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={residualChartData} margin={{ top: 10, right: 15, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F0ECE1" />
-                    <XAxis dataKey="name" stroke="#7E7C88" fontSize={11} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                    <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={11} tickLine={false} />
                     <YAxis
-                      stroke="#7E7C88"
+                      stroke="var(--chart-axis)"
                       fontSize={11}
                       tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
                       tickLine={false}
@@ -356,95 +357,98 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                     <Tooltip
                       formatter={(v) => [formatCurrency(v), 'Expected Annual Loss']}
                       contentStyle={{
-                        backgroundColor: '#ffffff',
-                        borderColor: '#E4E0D6',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                        backgroundColor: 'var(--surface-elevated)',
+                        borderColor: 'var(--border)',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        color: 'var(--text-primary)',
+                        boxShadow: 'var(--shadow-elevated)',
                       }}
+                      itemStyle={{ color: 'var(--text-primary)' }}
                     />
-                    <Bar dataKey="eal" radius={[3, 3, 0, 0]}>
-                      <Cell fill="#A32B2B" />
-                      <Cell fill="#3D7A52" />
+                    <Bar dataKey="eal" radius={[4, 4, 0, 0]}>
+                      {residualChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            </Card>
 
             {/* Right: Selected Actions Summary Card (6 Cols) */}
-            <div className="lg:col-span-6 bg-white rounded-md p-5 border border-[#E4E0D6] flex flex-col justify-between">
-              <div className="space-y-3">
+            <Card className="lg:col-span-6 p-5 flex flex-col justify-between">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#1C1B22] font-serif">
+                  <h3 className="text-sm font-semibold text-th-text-primary font-serif">
                     Portfolio Allocation Strategy
                   </h3>
-                  <span className="text-[11px] font-mono text-[#0F5C42] bg-[#EEF6F1] px-2 py-0.5 rounded border border-[#E4E0D6]">
+                  <Badge variant="brand" className="font-mono">
                     {optimizationResult.selected_actions?.length || 0} Controls Selected
-                  </span>
+                  </Badge>
                 </div>
 
-                <p className="text-xs text-[#4A4852] leading-relaxed">
+                <p className="text-sm text-th-text-secondary leading-relaxed">
                   The optimizer evaluated all feasible combinations across the asset inventory and allocated capital to controls providing the maximum system-wide risk reduction factor.
                 </p>
 
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="p-3 rounded bg-[#F7F5F0] border border-[#E4E0D6]">
-                    <span className="text-[11px] text-[#7E7C88] font-medium">Budget Efficiency</span>
-                    <div className="text-base font-bold text-[#1C1B22] font-mono mt-0.5">
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 rounded-xl bg-th-surface-el border border-th-border">
+                    <span className="text-[11px] text-th-text-secondary font-medium">Budget Efficiency</span>
+                    <div className="text-lg font-bold text-th-text-primary font-mono mt-1">
                       {formatPercent(optimizationResult.budget_utilization_pct)}
                     </div>
                   </div>
-                  <div className="p-3 rounded bg-[#EEF6F1] border border-[#E4E0D6]">
-                    <span className="text-[11px] text-[#0F5C42] font-medium">Risk Mitigated</span>
-                    <div className="text-base font-bold text-[#0F5C42] font-mono mt-0.5">
+                  <div className="p-4 rounded-xl bg-th-brand-tint border border-th-brand/20">
+                    <span className="text-[11px] text-th-brand font-medium">Risk Mitigated</span>
+                    <div className="text-lg font-bold text-th-brand font-mono mt-1">
                       {formatCurrency(optimizationResult.total_risk_reduction_usd)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 p-3 rounded bg-[#FAF6ED] border border-[#E4E0D6] text-xs text-[#9A7B2F] flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#9A7B2F] shrink-0" />
-                <span>Review prioritized mitigation deployments in the table below.</span>
+              <div className="mt-5 p-4 rounded-lg bg-th-accent-sec/10 border border-th-accent-sec/20 text-xs text-th-accent-sec flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-th-accent-sec shrink-0" />
+                <span className="font-medium">Review prioritized mitigation deployments in the table below.</span>
               </div>
-            </div>
+            </Card>
 
           </div>
 
           {/* Selected Actions Table */}
-          <div className="bg-white rounded-md border border-[#E4E0D6] overflow-hidden">
-            <div className="p-4 border-b border-[#E4E0D6] bg-white flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-1.5 rounded bg-[#EEF6F1] text-[#0F5C42]">
+          <Card className="overflow-hidden">
+            <div className="p-5 border-b border-th-border bg-th-surface flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-th-brand-tint text-th-brand shadow-soft">
                   <CheckCircle className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#1C1B22] font-serif">
+                  <h3 className="text-sm font-semibold text-th-text-primary font-serif">
                     Recommended Implementation Plan
                   </h3>
-                  <p className="text-[11px] text-[#7E7C88]">
+                  <p className="text-xs text-th-text-secondary mt-0.5">
                     Optimal asset-to-control assignments generated by the optimizer
                   </p>
                 </div>
               </div>
-              <span className="text-[11px] font-mono text-[#0F5C42] bg-[#EEF6F1] px-2 py-0.5 rounded border border-[#E4E0D6]">
+              <Badge variant="brand" className="font-mono">
                 {optimizationResult.selected_actions?.length || 0} Actions Selected
-              </span>
+              </Badge>
             </div>
 
-            <div className="overflow-x-auto max-h-72 overflow-y-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className="sticky top-0 bg-[#F7F5F0] border-b border-[#E4E0D6] text-[11px] font-semibold text-[#4A4852]">
+            <div className="overflow-x-auto max-h-80 overflow-y-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 bg-th-bg border-b border-th-border text-xs font-semibold text-th-text-secondary">
                   <tr>
-                    <th className="py-2.5 px-4">Asset ID</th>
-                    <th className="py-2.5 px-4">Control Name</th>
-                    <th className="py-2.5 px-4 text-right">Implementation Cost</th>
-                    <th className="py-2.5 px-4 text-right">Risk Reduction</th>
-                    <th className="py-2.5 px-4 text-right">ROSI</th>
+                    <th className="py-3 px-5">Asset ID</th>
+                    <th className="py-3 px-5">Control Name</th>
+                    <th className="py-3 px-5 text-right">Implementation Cost</th>
+                    <th className="py-3 px-5 text-right">Risk Reduction</th>
+                    <th className="py-3 px-5 text-right">ROSI</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E4E0D6] font-mono">
+                <tbody className="divide-y divide-th-border font-mono text-xs bg-th-surface">
                   {optimizationResult.selected_actions &&
                     optimizationResult.selected_actions.length > 0 ? (
                     optimizationResult.selected_actions.map((action, idx) => {
@@ -453,20 +457,20 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                       const rosi = action.ROSI || (cost > 0 ? red / cost : 0);
 
                       return (
-                        <tr key={idx} className="hover:bg-[#F7F5F0] transition-colors">
-                          <td className="py-2.5 px-4 text-[#1C1B22] font-bold">
+                        <tr key={idx} className="hover:bg-th-surface-el transition-colors">
+                          <td className="py-3 px-5 text-th-text-primary font-bold">
                             {action.asset_id}
                           </td>
-                          <td className="py-2.5 px-4 text-[#4A4852] font-sans font-medium">
+                          <td className="py-3 px-5 text-th-text-secondary font-sans font-medium">
                             {action.control_name || action.control_id}
                           </td>
-                          <td className="py-2.5 px-4 text-right text-[#1C1B22] tabular-nums">
+                          <td className="py-3 px-5 text-right text-th-text-primary tabular-nums">
                             {formatCurrency(cost)}
                           </td>
-                          <td className="py-2.5 px-4 text-right text-[#0F5C42] font-bold tabular-nums">
+                          <td className="py-3 px-5 text-right text-th-brand font-bold tabular-nums">
                             {formatCurrency(red)}
                           </td>
-                          <td className="py-2.5 px-4 text-right text-[#0F5C42] font-bold tabular-nums">
+                          <td className="py-3 px-5 text-right text-th-brand font-bold tabular-nums">
                             {formatMultiplier(rosi)}
                           </td>
                         </tr>
@@ -474,7 +478,7 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-[#7E7C88] font-sans">
+                      <td colSpan={5} className="py-10 text-center text-th-text-muted font-sans">
                         No actions selected for this budget level. Increase budget to see allocations.
                       </td>
                     </tr>
@@ -482,10 +486,9 @@ export const WhatIfOptimizer = ({ orgEal = 0 }) => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
         </>
       )}
     </div>
   );
 };
-

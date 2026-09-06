@@ -13,6 +13,11 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { formatCurrency } from '../../api/client';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export const AssetRiskTable = ({
   assets = [],
@@ -103,78 +108,66 @@ export const AssetRiskTable = ({
 
   const getSortIcon = (field) => {
     if (sortField !== field) {
-      return <ArrowUpDown className="w-3.5 h-3.5 text-[#7E7C88] opacity-60 group-hover:opacity-100 transition-opacity" />;
+      return <ArrowUpDown className="w-3.5 h-3.5 text-th-text-muted opacity-60 group-hover:opacity-100 transition-opacity" />;
     }
     return sortAsc ? (
-      <ArrowUp className="w-3.5 h-3.5 text-[#0F5C42]" />
+      <ArrowUp className="w-3.5 h-3.5 text-th-brand" />
     ) : (
-      <ArrowDown className="w-3.5 h-3.5 text-[#0F5C42]" />
+      <ArrowDown className="w-3.5 h-3.5 text-th-brand" />
     );
   };
 
   const getCriticalityBadge = (crit) => {
     const c = String(crit || '').toUpperCase();
     if (c === 'HIGH' || c === 'CRITICAL' || c === 'TIER 1') {
-      return (
-        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[#F9ECEC] text-[#A32B2B] border border-[#E4E0D6]">
-          {crit}
-        </span>
-      );
+      return <Badge variant="danger">{crit}</Badge>;
     }
     if (c === 'MEDIUM' || c === 'TIER 2') {
-      return (
-        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[#FAF3EB] text-[#B8752B] border border-[#E4E0D6]">
-          {crit}
-        </span>
-      );
+      return <Badge variant="warning">{crit}</Badge>;
     }
-    return (
-      <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[#EEF6F1] text-[#3D7A52] border border-[#E4E0D6]">
-        {crit || 'Low'}
-      </span>
-    );
+    return <Badge variant="success">{crit || 'Low'}</Badge>;
   };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-md p-6 border border-[#E4E0D6] animate-pulse">
-        <div className="h-5 bg-[#E4E0D6] rounded w-1/4 mb-4"></div>
+      <Card className="p-6 animate-pulse">
+        <div className="h-5 bg-th-border rounded w-1/4 mb-4"></div>
         <div className="space-y-2.5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-10 bg-[#F7F5F0] rounded"></div>
+            <div key={i} className="h-10 bg-th-bg rounded"></div>
           ))}
         </div>
-      </div>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-md p-6 border border-[#A32B2B]/30 text-center">
-        <AlertCircle className="w-6 h-6 text-[#A32B2B] mx-auto mb-2" />
-        <p className="text-sm font-semibold text-[#A32B2B] font-serif">Failed to load asset inventory</p>
-        <p className="text-xs text-[#A32B2B]/90 mt-1">{error}</p>
-      </div>
+      <Card className="p-6 border-th-danger/30 bg-th-danger-tint text-center">
+        <AlertCircle className="w-6 h-6 text-th-danger mx-auto mb-2" />
+        <p className="text-sm font-semibold text-th-danger font-serif">Failed to load asset inventory</p>
+        <p className="text-xs text-th-danger/90 mt-1">{error}</p>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white rounded-md border border-[#E4E0D6] overflow-hidden flex flex-col">
+    <Card className="flex flex-col">
       {/* Header controls & Filters */}
-      <div className="p-4 sm:p-5 border-b border-[#E4E0D6] bg-white space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-1.5 rounded bg-[#EEF6F1] text-[#0F5C42]">
+      <div className="p-4 sm:p-5 border-b border-th-border bg-th-surface space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-th-brand-tint text-th-brand shadow-soft">
               <Server className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-semibold text-[#1C1B22] font-serif flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-semibold text-th-text-primary font-serif flex items-center gap-2">
                 <span>Asset Cyber Risk Portfolio</span>
-                <span className="text-[11px] font-mono text-[#0F5C42] bg-[#EEF6F1] px-2 py-0.5 rounded border border-[#E4E0D6]">
+                <Badge variant="default" className="font-mono hidden sm:inline-flex">
                   {processedAssets.length} displayed ({assets.length} total)
-                </span>
+                </Badge>
               </h3>
-              <p className="text-[11px] text-[#7E7C88]">
+              <p className="text-xs text-th-text-secondary mt-0.5">
                 Displaying assets with quantified financial exposure. Click any row to inspect loss exceedance curves.
               </p>
             </div>
@@ -183,28 +176,26 @@ export const AssetRiskTable = ({
           {/* Search Box & Quick Toggle */}
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-[#7E7C88] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-th-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search asset, BU, or criticality..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#F7F5F0] border border-[#E4E0D6] rounded text-[#1C1B22] placeholder-[#7E7C88] focus:outline-none focus:bg-white focus:border-[#0F5C42] transition-colors"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-th-surface border border-th-border rounded-full text-th-text-primary placeholder-th-text-muted focus:outline-none focus:ring-2 focus:ring-th-brand focus:border-transparent transition-all shadow-soft"
               />
             </div>
 
             {zeroRiskAssetsCount > 0 && !searchTerm.trim() && (
-              <button
+              <Button
+                variant={showZeroRisk ? 'primary' : 'secondary'}
+                size="sm"
+                className="hidden md:inline-flex whitespace-nowrap"
                 onClick={() => setShowZeroRisk(!showZeroRisk)}
-                className={`hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors whitespace-nowrap ${
-                  showZeroRisk
-                    ? 'bg-[#0F5C42] text-white border-[#0F5C42]'
-                    : 'bg-[#F7F5F0] text-[#4A4852] hover:text-[#1C1B22] border-[#E4E0D6]'
-                }`}
                 title={showZeroRisk ? 'Hide assets with $0 EAL' : 'Show assets with $0 EAL'}
               >
-                <span>{showZeroRisk ? 'Hide $0 EAL' : `+${zeroRiskAssetsCount} Zero-Risk`}</span>
-              </button>
+                {showZeroRisk ? 'Hide $0 EAL' : `+${zeroRiskAssetsCount} Zero-Risk`}
+              </Button>
             )}
           </div>
         </div>
@@ -212,18 +203,19 @@ export const AssetRiskTable = ({
         {/* Business Unit Quick Filter Pills */}
         {businessUnits.length > 2 && (
           <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
-            <span className="text-[#7E7C88] text-[11px] font-medium flex items-center mr-1">
-              <Filter className="w-3 h-3 mr-1 text-[#7E7C88]" /> Filter BU:
+            <span className="text-th-text-muted text-[11px] font-medium flex items-center mr-1 shrink-0">
+              <Filter className="w-3 h-3 mr-1" /> Filter BU:
             </span>
             {businessUnits.map((bu) => (
               <button
                 key={bu}
                 onClick={() => setSelectedBU(bu)}
-                className={`px-2.5 py-0.5 rounded text-xs font-medium whitespace-nowrap transition-colors border ${
+                className={twMerge(
+                  'px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors border',
                   selectedBU === bu
-                    ? 'bg-[#0F5C42] text-white border-[#0F5C42]'
-                    : 'bg-[#F7F5F0] text-[#4A4852] hover:text-[#1C1B22] hover:bg-[#EAE6DB] border-[#E4E0D6]'
-                }`}
+                    ? 'bg-th-brand text-white border-th-brand'
+                    : 'bg-th-surface text-th-text-secondary hover:text-th-text-primary hover:bg-th-surface-el border-th-border shadow-soft'
+                )}
               >
                 {bu === 'ALL' ? 'All Units' : bu}
               </button>
@@ -235,11 +227,11 @@ export const AssetRiskTable = ({
       {/* Table Content */}
       <div className="overflow-x-auto max-h-[520px] overflow-y-auto">
         <table className="w-full text-left border-collapse">
-          <thead className="sticky top-0 z-10 bg-[#F7F5F0] border-b border-[#E4E0D6] text-[11px] font-semibold text-[#4A4852]">
+          <thead className="sticky top-0 z-10 bg-th-bg border-b border-th-border text-[11px] font-semibold text-th-text-secondary uppercase tracking-wider">
             <tr>
               <th
                 onClick={() => handleSort('asset_id')}
-                className="py-2.5 px-4 cursor-pointer hover:text-[#1C1B22] group transition-colors"
+                className="py-3 px-4 cursor-pointer hover:text-th-text-primary group transition-colors"
               >
                 <div className="flex items-center space-x-1.5">
                   <span>Asset ID</span>
@@ -248,7 +240,7 @@ export const AssetRiskTable = ({
               </th>
               <th
                 onClick={() => handleSort('business_unit')}
-                className="py-2.5 px-4 cursor-pointer hover:text-[#1C1B22] group transition-colors"
+                className="py-3 px-4 cursor-pointer hover:text-th-text-primary group transition-colors"
               >
                 <div className="flex items-center space-x-1.5">
                   <span>Business Unit</span>
@@ -257,7 +249,7 @@ export const AssetRiskTable = ({
               </th>
               <th
                 onClick={() => handleSort('criticality')}
-                className="py-2.5 px-4 cursor-pointer hover:text-[#1C1B22] group transition-colors"
+                className="py-3 px-4 cursor-pointer hover:text-th-text-primary group transition-colors"
               >
                 <div className="flex items-center space-x-1.5">
                   <span>Criticality</span>
@@ -266,7 +258,7 @@ export const AssetRiskTable = ({
               </th>
               <th
                 onClick={() => handleSort('EAL_usd')}
-                className="py-2.5 px-4 cursor-pointer hover:text-[#1C1B22] group transition-colors text-right"
+                className="py-3 px-4 cursor-pointer hover:text-th-text-primary group transition-colors text-right"
               >
                 <div className="flex items-center justify-end space-x-1.5">
                   <span>Expected Loss (EAL)</span>
@@ -275,7 +267,7 @@ export const AssetRiskTable = ({
               </th>
               <th
                 onClick={() => handleSort('VaR95_usd')}
-                className="py-2.5 px-4 cursor-pointer hover:text-[#1C1B22] group transition-colors text-right"
+                className="py-3 px-4 cursor-pointer hover:text-th-text-primary group transition-colors text-right"
               >
                 <div className="flex items-center justify-end space-x-1.5">
                   <span>VaR 95%</span>
@@ -284,20 +276,20 @@ export const AssetRiskTable = ({
               </th>
               <th
                 onClick={() => handleSort('priority_score')}
-                className="py-2.5 px-4 cursor-pointer hover:text-[#1C1B22] group transition-colors text-right"
+                className="py-3 px-4 cursor-pointer hover:text-th-text-primary group transition-colors text-right"
               >
                 <div className="flex items-center justify-end space-x-1.5">
                   <span>Priority Score</span>
                   {getSortIcon('priority_score')}
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-center w-8"></th>
+              <th className="py-3 px-3 text-center w-8"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E4E0D6] text-xs">
+          <tbody className="divide-y divide-th-border text-xs bg-th-surface">
             {processedAssets.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-[#7E7C88]">
+                <td colSpan={7} className="py-8 text-center text-th-text-muted">
                   No assets match the search criteria.
                 </td>
               </tr>
@@ -311,23 +303,24 @@ export const AssetRiskTable = ({
                   <tr
                     key={asset.asset_id}
                     onClick={() => onSelectAsset(asset.asset_id)}
-                    className={`cursor-pointer transition-colors ${
+                    className={clsx(
+                      'cursor-pointer transition-colors',
                       isSelected
-                        ? 'bg-[#EEF6F1] border-l-4 border-l-[#0F5C42]'
+                        ? 'bg-th-brand-tint border-l-4 border-l-th-brand'
                         : isTop5
-                        ? 'bg-[#F9ECEC]/35 hover:bg-[#F9ECEC]/65'
+                        ? 'bg-th-danger-tint hover:bg-th-danger-tint/80'
                         : isZeroEal
-                        ? 'bg-[#F7F5F0]/60 hover:bg-[#F7F5F0]'
-                        : 'hover:bg-[#F7F5F0]'
-                    }`}
+                        ? 'bg-th-bg hover:bg-th-surface-el'
+                        : 'hover:bg-th-surface-el'
+                    )}
                   >
                     {/* Asset ID */}
-                    <td className="py-3 px-4 font-mono font-medium text-[#1C1B22]">
+                    <td className="py-3 px-4 font-mono font-medium text-th-text-primary">
                       <div className="flex items-center space-x-2">
                         <span>{asset.asset_id}</span>
                         {isTop5 && (
                           <span
-                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#F9ECEC] text-[#A32B2B] border border-[#A32B2B]/20"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-th-danger-tint text-th-danger border border-th-danger/20"
                             title="Top 5 Enterprise Risk Contributor"
                           >
                             TOP 5
@@ -335,7 +328,7 @@ export const AssetRiskTable = ({
                         )}
                         {isZeroEal && (
                           <span
-                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-[#7E7C88] bg-[#EAE6DB] border border-[#E4E0D6]"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-th-text-muted bg-th-surface-el border border-th-border"
                             title="Zero quantified baseline risk"
                           >
                             $0 EAL
@@ -345,7 +338,7 @@ export const AssetRiskTable = ({
                     </td>
 
                     {/* Business Unit */}
-                    <td className="py-3 px-4 text-[#4A4852]">
+                    <td className="py-3 px-4 text-th-text-secondary">
                       {asset.business_unit}
                     </td>
 
@@ -355,18 +348,18 @@ export const AssetRiskTable = ({
                     </td>
 
                     {/* EAL */}
-                    <td className="py-3 px-4 text-right font-mono font-bold text-[#1C1B22] tabular-nums">
+                    <td className="py-3 px-4 text-right font-mono font-bold text-th-text-primary tabular-nums">
                       {isZeroEal ? (
-                        <span className="text-[#7E7C88] font-normal">$0</span>
+                        <span className="text-th-text-muted font-normal">$0</span>
                       ) : (
                         formatCurrency(asset.EAL_usd)
                       )}
                     </td>
 
                     {/* VaR95 */}
-                    <td className="py-3 px-4 text-right font-mono text-[#B8752B] font-medium tabular-nums">
+                    <td className="py-3 px-4 text-right font-mono text-th-warning font-medium tabular-nums">
                       {isZeroEal ? (
-                        <span className="text-[#7E7C88] font-normal">$0</span>
+                        <span className="text-th-text-muted font-normal">$0</span>
                       ) : (
                         formatCurrency(asset.VaR95_usd)
                       )}
@@ -374,16 +367,16 @@ export const AssetRiskTable = ({
 
                     {/* Priority Score */}
                     <td className="py-3 px-4 text-right font-mono tabular-nums">
-                      <span className="inline-block px-2 py-0.5 rounded bg-[#F7F5F0] text-[#4A4852] border border-[#E4E0D6]">
+                      <Badge variant="default" className="font-mono inline-flex">
                         {asset.priority_score !== undefined
                           ? Number(asset.priority_score).toFixed(1)
                           : '—'}
-                      </span>
+                      </Badge>
                     </td>
 
                     {/* Action Icon */}
-                    <td className="py-3 px-3 text-center text-[#7E7C88] group-hover:text-[#0F5C42]">
-                      <ChevronRight className="w-3.5 h-3.5 mx-auto" />
+                    <td className="py-3 px-3 text-center text-th-text-muted group-hover:text-th-brand">
+                      <ChevronRight className="w-4 h-4 mx-auto" />
                     </td>
                   </tr>
                 );
@@ -395,38 +388,37 @@ export const AssetRiskTable = ({
 
       {/* Interactive Collapsible Banner for 0 EAL Assets */}
       {zeroRiskAssetsCount > 0 && !searchTerm.trim() && (
-        <div className="p-3.5 px-4 bg-[#F7F5F0] border-t border-[#E4E0D6] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-[#4A4852]">
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-4 h-4 text-[#0F5C42] shrink-0" />
+        <div className="p-4 bg-th-bg border-t border-th-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm text-th-text-secondary">
+          <div className="flex items-center space-x-2.5">
+            <ShieldCheck className="w-5 h-5 text-th-brand shrink-0" />
             <span>
               {showZeroRisk ? (
                 <>
-                  Showing all <strong>{zeroRiskAssetsCount} assets</strong> with zero quantified loss ($0 EAL).
+                  Showing all <strong className="text-th-text-primary">{zeroRiskAssetsCount} assets</strong> with zero quantified loss ($0 EAL).
                 </>
               ) : (
                 <>
-                  <strong>{zeroRiskAssetsCount} assets</strong> have zero active vulnerabilities or zero quantified loss ($0 EAL) and are hidden from the primary view.
+                  <strong className="text-th-text-primary">{zeroRiskAssetsCount} assets</strong> have zero active vulnerabilities or zero quantified loss ($0 EAL) and are hidden from the primary view.
                 </>
               )}
             </span>
           </div>
 
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowZeroRisk(!showZeroRisk)}
-            className="inline-flex items-center justify-center space-x-1 px-3.5 py-1.5 rounded bg-white hover:bg-[#FAF6ED] text-[#0F5C42] font-medium border border-[#E4E0D6] shadow-xs transition-colors whitespace-nowrap self-start sm:self-auto"
+            className="self-start sm:self-auto whitespace-nowrap"
           >
             <span>{showZeroRisk ? 'Hide $0 EAL Assets' : `Show ${zeroRiskAssetsCount} Zero-Risk Assets`}</span>
             {showZeroRisk ? (
-              <ChevronUp className="w-3.5 h-3.5 text-[#0F5C42]" />
+              <ChevronUp className="w-4 h-4 ml-1.5 text-th-brand" />
             ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-[#0F5C42]" />
+              <ChevronDown className="w-4 h-4 ml-1.5 text-th-brand" />
             )}
-          </button>
+          </Button>
         </div>
       )}
-    </div>
+    </Card>
   );
 };
-
-
-
