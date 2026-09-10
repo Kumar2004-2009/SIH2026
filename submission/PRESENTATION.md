@@ -6,9 +6,6 @@ Keep your final SIH presentation in the repository whenever the file size allows
 
 - **Location in repo:** [`submission/CyberRisk_SIH2026_PS26105.pptx`](./CyberRisk_SIH2026_PS26105.pptx)
 
-
-*(Set sharing to "Anyone with the link can view" — reviewers should never have to request access.)*
-
 ## Presentation Details
 
 - **Project Title:** CyberRisk – FAIR-Based Cyber Risk Quantification & Investment Optimization Platform
