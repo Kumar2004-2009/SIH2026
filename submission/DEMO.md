@@ -4,9 +4,7 @@ The demo video is **optional**, but strongly recommended if your project has a w
 
 ## Demo video link
 
-`https://drive.google.com/file/d/12zQtZQ1rr2xGlWx2uyhK1CtoovRe_iEr/view?usp=drive_link`
-
-*(Set video/link visibility to "Anyone with the link can view" — reviewers should never have to request access.)*
+[Watch Demo Video](https://drive.google.com/file/d/12zQtZQ1rr2xGlWx2uyhK1CtoovRe_iEr/view?usp=drive_link)
 
 ## What the video shows
 
