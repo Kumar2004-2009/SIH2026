@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Header } from '../components/layout/Header';
+import { Sidebar } from '../components/layout/Sidebar';
 import { ExecutiveSummary } from '../components/dashboard/ExecutiveSummary';
 import { BusinessUnitChart } from '../components/dashboard/BusinessUnitChart';
 import { AssetRiskTable } from '../components/dashboard/AssetRiskTable';
@@ -12,19 +13,25 @@ import { Card, CardContent } from '../components/ui/Card';
 import { ComplianceDashboard } from '../components/dashboard/ComplianceDashboard';
 import { RiskTrendChart } from '../components/dashboard/RiskTrendChart';
 import { InvestmentFrontierChart } from '../components/dashboard/InvestmentFrontierChart';
-import { getOrgRisk, getBusinessUnits, getAssets, getControlsRoi, getRiskTrend, getInvestmentFrontier } from '../api/client';
+import { LiveThreatFeed } from '../components/dashboard/LiveThreatFeed';
+import { PortfolioLECChart } from '../components/dashboard/PortfolioLECChart';
+import { SystemicRiskGraph } from '../components/dashboard/SystemicRiskGraph';
+import { getOrgRisk, getBusinessUnits, getAssets, getControlsRoi, getRiskTrend, getInvestmentFrontier, getPortfolioLec } from '../api/client';
 import {
   Server,
   Zap,
   Award,
   Shield,
-  FileCheck
+  FileCheck,
+  Share2
 } from 'lucide-react';
 
 export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedAssetId, setSelectedAssetId] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [realtimeAssetOverrides, setRealtimeAssetOverrides] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // API hooks
   const orgRisk = useApi(getOrgRisk);
@@ -33,9 +40,33 @@ export function DashboardPage() {
   const controlsRoi = useApi(getControlsRoi);
   const riskTrend = useApi(getRiskTrend);
   const frontier = useApi(getInvestmentFrontier);
+  const portfolioLec = useApi(getPortfolioLec);
+
+  const handleAssetRiskUpdate = (assetId, newMetrics) => {
+    setRealtimeAssetOverrides((prev) => ({
+      ...prev,
+      [assetId]: {
+        ...(prev[assetId] || {}),
+        ...newMetrics,
+      },
+    }));
+  };
+
+  const reactiveAssets = React.useMemo(() => {
+    if (!assets.data || !Array.isArray(assets.data)) return assets.data;
+    if (Object.keys(realtimeAssetOverrides).length === 0) return assets.data;
+    return assets.data.map((item) => {
+      const override = realtimeAssetOverrides[item.asset_id];
+      if (override) {
+        return { ...item, ...override };
+      }
+      return item;
+    });
+  }, [assets.data, realtimeAssetOverrides]);
 
   const handleRefreshAll = async () => {
     setIsRefreshing(true);
+    setRealtimeAssetOverrides({});
     try {
       await Promise.allSettled([
         orgRisk.refetch(),
@@ -44,6 +75,7 @@ export function DashboardPage() {
         controlsRoi.refetch(),
         riskTrend.refetch(),
         frontier.refetch(),
+        portfolioLec.refetch(),
       ]);
     } finally {
       setIsRefreshing(false);
@@ -62,8 +94,18 @@ export function DashboardPage() {
         setActiveTab={setActiveTab}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-fluid-lg space-y-fluid-md">
+      {/* Body: sidebar + content */}
+      <div className="flex flex-1">
+        {/* Left Sidebar */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen((o) => !o)}
+        />
+
+        {/* Main Container */}
+        <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-fluid-lg space-y-fluid-md">
         {/* TAB 1: EXECUTIVE OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-fluid-md animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -74,6 +116,17 @@ export function DashboardPage() {
               error={orgRisk.error}
               statusCode={orgRisk.statusCode}
               onRetry={orgRisk.refetch}
+            />
+
+            {/* Live Streaming Threat Telemetry Ticker */}
+            <LiveThreatFeed onAssetRiskUpdate={handleAssetRiskUpdate} />
+
+            {/* Enterprise-wide Portfolio Loss Exceedance Curve */}
+            <PortfolioLECChart
+              data={portfolioLec.data}
+              loading={portfolioLec.loading}
+              error={portfolioLec.error}
+              onRetry={portfolioLec.refetch}
             />
 
             {/* Middle Section: Business Units & Controls ROI */}
@@ -122,7 +175,7 @@ export function DashboardPage() {
             </div>
 
             <AssetRiskTable
-              assets={assets.data}
+              assets={reactiveAssets}
               loading={assets.loading}
               error={assets.error}
               onSelectAsset={(id) => setSelectedAssetId(id)}
@@ -131,7 +184,14 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 3: CONTROLS & ROI */}
+        {/* TAB 3: SYSTEMIC RISK & AD DEPENDENCY GRAPH */}
+        {activeTab === 'graph' && (
+          <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <SystemicRiskGraph />
+          </div>
+        )}
+
+        {/* TAB 4: CONTROLS & ROI */}
         {activeTab === 'controls' && (
           <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-th-border pb-4">
@@ -181,14 +241,14 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 4: COMPLIANCE */}
+        {/* TAB 5: COMPLIANCE */}
         {activeTab === 'compliance' && (
           <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
             <ComplianceDashboard />
           </div>
         )}
 
-        {/* TAB 5: WHAT-IF OPTIMIZER */}
+        {/* TAB 6: WHAT-IF OPTIMIZER */}
         {activeTab === 'optimizer' && (
           <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
             <InvestmentFrontierChart
@@ -201,6 +261,8 @@ export function DashboardPage() {
           </div>
         )}
       </main>
+
+      </div>{/* end flex body */}
 
       {/* Asset Drilldown Side Panel */}
       {selectedAssetId && (
@@ -253,3 +315,4 @@ export function DashboardPage() {
 }
 
 export default DashboardPage;
+

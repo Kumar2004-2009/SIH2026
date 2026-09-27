@@ -60,13 +60,17 @@ class ControlScenarios:
                 new_vuln = self.likelihood.calculate_vulnerability(after_row)
                 after_row["Vuln_asset"] = new_vuln
                 
-                # 3. Rerun Monte Carlo Simulation
-                sim_result = self.simulator.run_simulation(after_row)
-                eal_after = sim_result["EAL_usd"]
+                # 3. Calculate EAL after control application
+                vuln_before = asset_row.get("Vuln_asset", 0.0)
+                if vuln_before > 0:
+                    eal_after = eal_before * (new_vuln / vuln_before)
+                else:
+                    eal_after = eal_before * (1.0 - risk_reduction)
+                eal_after = max(0.0, float(eal_after))
                 
                 # 4. Calculate ROI metrics
                 risk_reduction_usd = eal_before - eal_after
-                rosi = (risk_reduction_usd - cost_usd) / cost_usd if cost_usd > 0 else float('inf')
+                rosi = risk_reduction_usd / cost_usd if cost_usd > 0 else float('inf')
                 
                 results.append({
                     "control_id": control_id,
