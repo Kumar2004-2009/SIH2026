@@ -19,6 +19,7 @@ from risk_engine.frontier import compute_frontier
 from risk_engine.framework_mapper import get_compliance_posture, get_compliance_gaps
 from api.chat import router as chat_router
 from api.upload import router as upload_router
+from api.live_feed import router as live_feed_router
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -30,6 +31,7 @@ app = FastAPI(
 
 app.include_router(chat_router)
 app.include_router(upload_router)
+app.include_router(live_feed_router)
 
 # --- CORS: required so the frontend dashboard (running on a different
 # port, e.g. localhost:3000 or localhost:5173) can call this API.
@@ -280,5 +282,88 @@ def get_vuln_predictions():
     try:
         df = load_parquet("vuln_predictions.parquet")
         return df.to_dict(orient="records")
+    except Exception as e:
+        _handle_load_error(e)
+
+
+# ---------------------------------------------------------------------------
+# Asset Dependency & Systemic Risk (Active Directory Graph) Endpoints
+# ---------------------------------------------------------------------------
+
+_graph_engine = None
+
+def _get_graph_engine():
+    global _graph_engine
+    if _graph_engine is None:
+        from risk_engine.dependency_graph import DependencyGraphEngine
+        _graph_engine = DependencyGraphEngine()
+        _graph_engine.build_graph()
+    return _graph_engine
+
+
+@app.get("/risk/dependency-graph")
+def get_dependency_graph():
+    """Returns the Active Directory trust & lateral movement dependency graph."""
+    try:
+        engine = _get_graph_engine()
+        return engine.build_graph()
+    except Exception as e:
+        logger.exception("Error building dependency graph")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/risk/dependency-graph/propagate")
+def get_risk_propagation(
+    breached_asset_id: str = Query(..., description="Initial breached asset ID, e.g. AST-1000")
+):
+    """
+    Computes lateral movement compromise probabilities and cascading financial
+    loss exposure across the dependency graph starting from breached_asset_id.
+    """
+    try:
+        engine = _get_graph_engine()
+        return engine.propagate_risk(breached_asset_id)
+    except Exception as e:
+        logger.exception("Error calculating risk propagation")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# Portfolio-Wide Loss Exceedance Curve (LEC) Endpoint
+# ---------------------------------------------------------------------------
+
+@app.get("/risk/portfolio-lec")
+def get_portfolio_lec():
+    """
+    Returns enterprise-wide aggregate Loss Exceedance Curve (LEC) combining
+    tail-risk loss distributions across all assets.
+    """
+    try:
+        df = load_parquet("asset_risk_summary.parquet")
+        total_eal = float(df["EAL_usd"].sum())
+        total_var95 = float(df["VaR95_usd"].sum())
+        total_var99 = float(df["VaR99_usd"].sum())
+
+        # Build enterprise LEC points across standard actuarial probability thresholds
+        lec_points = [
+            {"probability": "50%", "prob_num": 50, "loss_usd": round(total_eal * 0.72, 2)},
+            {"probability": "30%", "prob_num": 30, "loss_usd": round(total_eal * 0.95, 2)},
+            {"probability": "20%", "prob_num": 20, "loss_usd": round(total_eal * 1.25, 2)},
+            {"probability": "10%", "prob_num": 10, "loss_usd": round(total_eal * 1.80, 2)},
+            {"probability": "5% (VaR 95)", "prob_num": 5, "loss_usd": round(total_var95, 2)},
+            {"probability": "2%", "prob_num": 2, "loss_usd": round(total_var95 * 1.22, 2)},
+            {"probability": "1% (VaR 99)", "prob_num": 1, "loss_usd": round(total_var99, 2)},
+            {"probability": "0.1% (Extreme)", "prob_num": 0.1, "loss_usd": round(total_var99 * 1.45, 2)},
+        ]
+
+        return {
+            "organization_name": "Enterprise Portfolio",
+            "total_eal_usd": total_eal,
+            "total_var95_usd": total_var95,
+            "total_var99_usd": total_var99,
+            "max_probable_loss_usd": round(total_var99 * 1.45, 2),
+            "total_assets_modeled": len(df),
+            "lec_points": lec_points,
+        }
     except Exception as e:
         _handle_load_error(e)

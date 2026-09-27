@@ -182,6 +182,51 @@ export const getVulnPredictions = async () => {
 };
 
 /**
+ * Live streaming threat events fallback REST endpoint
+ */
+export const getRecentLiveEvents = async () => {
+  const response = await apiClient.get('/api/live-feed/recent');
+  return response.data;
+};
+
+/**
+ * Active Directory dependency graph topology
+ */
+export const getDependencyGraph = async () => {
+  const response = await apiClient.get('/risk/dependency-graph');
+  return response.data;
+};
+
+/**
+ * Systemic lateral movement risk propagation from breached asset
+ * @param {string} breachedAssetId - e.g. "AST-1000"
+ */
+export const getRiskPropagation = async (breachedAssetId) => {
+  const response = await apiClient.get('/risk/dependency-graph/propagate', {
+    params: { breached_asset_id: breachedAssetId },
+  });
+  return response.data;
+};
+
+/**
+ * Enterprise-wide aggregate Loss Exceedance Curve (LEC) data
+ */
+export const getPortfolioLec = async () => {
+  const response = await apiClient.get('/risk/portfolio-lec');
+  return response.data;
+};
+
+/**
+ * Constructs the WebSocket endpoint URL for live streaming threat telemetry
+ */
+export const getLiveFeedWsUrl = () => {
+  const httpUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  const wsProtocol = httpUrl.startsWith('https') ? 'wss' : 'ws';
+  const cleanBase = httpUrl.replace(/^https?:\/\//, '');
+  return `${wsProtocol}://${cleanBase}/ws/live-feed`;
+};
+
+/**
  * Currency formatter: $1,234,567
  */
 export const formatCurrency = (val) => {

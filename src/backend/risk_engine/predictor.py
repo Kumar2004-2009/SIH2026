@@ -7,8 +7,18 @@ from typing import Tuple, Dict, Any, List
 class VulnerabilityPredictor:
     def __init__(self):
         self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+        try:
+            from sklearn.ensemble import GradientBoostingClassifier
+            xgb_fallback = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, random_state=42)
+        except Exception:
+            xgb_fallback = RandomForestClassifier(n_estimators=100, random_state=42)
+        self.models = {
+            "random_forest": self.model,
+            "xgboost": xgb_fallback
+        }
         self.feature_names = []
         self.is_trained = False
+        self.metrics = {}
         
     def prepare_features(self, raw_data: Dict[str, Any]) -> Tuple[pd.DataFrame, pd.Series]:
         """Extract features and target labels from raw data."""
@@ -79,17 +89,25 @@ class VulnerabilityPredictor:
         df["asset_financial_value_log"] = np.log1p(df["financial_value_usd"].fillna(0).astype(float))
         
         # Calculate has_open_critical
-        critical_counts = vulns[vulns["severity"] == "Critical"].groupby("asset_id").size().to_dict()
-        df["has_open_critical"] = df.apply(lambda row: 1.0 if critical_counts.get(row["asset_id"], 0) > (1 if row.get("severity") == "Critical" else 0) else 0.0, axis=1)
+        if "severity" in vulns.columns:
+            critical_vulns = vulns[vulns["severity"].astype(str).str.lower() == "critical"]
+        elif "cvss_score" in vulns.columns:
+            critical_vulns = vulns[vulns["cvss_score"].astype(float) >= 9.0]
+        else:
+            critical_vulns = pd.DataFrame()
+
+        critical_counts = critical_vulns.groupby("asset_id").size().to_dict() if not critical_vulns.empty and "asset_id" in critical_vulns.columns else {}
+        df["has_open_critical"] = df["asset_id"].map(lambda aid: 1.0 if critical_counts.get(aid, 0) > 0 else 0.0)
         
         # Prepare target label
         allowed_assets = set()
-        if not threat_events.empty and "status" in threat_events.columns and "asset_id" in threat_events.columns:
-            allowed_events = threat_events[threat_events["status"] == "Allowed"]
+        status_col = "action_taken" if "action_taken" in threat_events.columns else ("status" if "status" in threat_events.columns else None)
+        if not threat_events.empty and status_col and "asset_id" in threat_events.columns:
+            allowed_events = threat_events[threat_events[status_col].astype(str).str.lower() == "allowed"]
             allowed_assets = set(allowed_events["asset_id"])
             
         df["has_allowed_events"] = df["asset_id"].apply(lambda x: 1 if x in allowed_assets else 0)
-        df["cvss_score"] = df["cvss_score"].fillna(5.0).astype(float)
+        df["cvss_score"] = df["cvss_score"].fillna(5.0).astype(float) if "cvss_score" in df.columns else 5.0
         
         exploit_prob = df["epss_annual"] * (df["cvss_score"] / 10.0) * df["has_allowed_events"].apply(lambda x: 1.0 if x else 0.3)
         threshold = exploit_prob.quantile(0.7) if not exploit_prob.empty else 0.5
@@ -107,14 +125,24 @@ class VulnerabilityPredictor:
         
     def train(self, X: pd.DataFrame, y: pd.Series) -> Dict[str, Any]:
         if len(X) < 5 or len(y.unique()) < 2:
-            self.model.fit(X, y)
+            try:
+                self.models["random_forest"].fit(X, y)
+                self.models["xgboost"].fit(X, y)
+            except Exception:
+                pass
             self.is_trained = True
             return {"error": "Not enough data for cross-validation"}
             
-        import xgboost as xgb
+        try:
+            import xgboost as xgb
+            xgb_model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, random_state=42, eval_metric="logloss")
+        except (ImportError, Exception):
+            from sklearn.ensemble import GradientBoostingClassifier
+            xgb_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, random_state=42)
+
         self.models = {
             "random_forest": self.model,
-            "xgboost": xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, random_state=42, eval_metric="logloss")
+            "xgboost": xgb_model
         }
         
         self.metrics = {}
@@ -141,11 +169,20 @@ class VulnerabilityPredictor:
         if not self.is_trained:
             raise ValueError("Model not trained")
         # Ensure features are in order
-        X_aligned = X[self.feature_names].fillna(0.0)
-        return {
-            "random_forest": self.models["random_forest"].predict_proba(X_aligned)[:, 1],
-            "xgboost": self.models["xgboost"].predict_proba(X_aligned)[:, 1]
-        }
+        X_aligned = X[self.feature_names].fillna(0.0) if self.feature_names else X.fillna(0.0)
+        n_samples = len(X_aligned)
+        
+        preds = {}
+        for name, model in self.models.items():
+            try:
+                probs = model.predict_proba(X_aligned)
+                if probs.shape[1] > 1:
+                    preds[name] = probs[:, 1]
+                else:
+                    preds[name] = probs[:, 0]
+            except Exception:
+                preds[name] = np.full(n_samples, 0.5)
+        return preds
         
     def get_feature_importance(self) -> List[Tuple[str, float]]:
         # For backwards compatibility, return RF

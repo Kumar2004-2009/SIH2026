@@ -23,9 +23,9 @@ Enterprises invest heavily in cybersecurity tools and compliance programs, yet c
 
 ## 3. Proposed Solution
 
-**CyberRisk** bridges the gap between technical vulnerability telemetry and boardroom financial decisions using the **Open FAIR™ (Factor Analysis of Information Risk)** methodology combined with **Monte Carlo simulation**.
+**CyberRisk** bridges the gap between technical vulnerability telemetry and boardroom financial decisions using the **Open FAIR™ (Factor Analysis of Information Risk)** methodology, **supervised Machine Learning**, and **Monte Carlo simulation**.
 
-Users can upload their own enterprise cyber telemetry (5 CSV files, a ZIP bundle, or a compiled JSON dataset) — or use the built-in demo dataset — to run a full FAIR-based Monte Carlo risk quantification pipeline. The platform computes Expected Annual Loss (EAL) and Value at Risk (VaR95/VaR99) at the asset, business-unit, and organization level, evaluates the Return on Security Investment (ROSI) of candidate security controls, and mathematically determines the optimal security investment plan under a specified budget using Integer Linear Programming (ILP). All of this is presented through an interactive dashboard, with an embedded AI assistant for natural-language questions about the organization's risk posture.
+Users can upload their own enterprise cyber telemetry (5 CSV files, a ZIP bundle, or a compiled JSON dataset) — or use the built-in demo dataset — to run a full FAIR-based Monte Carlo risk quantification pipeline. The platform computes Expected Annual Loss (EAL) and Value at Risk (VaR95/VaR99) at the asset, business-unit, and organization level, evaluates the Return on Security Investment (ROSI) of candidate security controls, runs trained ML models for vulnerability exploitation forecasting, maps posture against national and international compliance frameworks (ISO 27001, NIST CSF, CIS Controls, RBI CSF, SEBI CSCRF), computes the Pareto-optimal Investment Frontier curve with automated diminishing-returns knee-point detection, and mathematically determines the optimal security investment plan under a specified budget using Integer Linear Programming (ILP). All of this is presented through an interactive executive dashboard, with an embedded AI assistant for natural-language questions about the organization's risk posture.
 
 ---
 
@@ -34,10 +34,20 @@ Users can upload their own enterprise cyber telemetry (5 CSV files, a ZIP bundle
 - **Interactive Dataset Ingestion & Validation:** Drag-and-drop upload of a 5-CSV bundle, a ZIP archive, or a compiled `compiled_risk_dataset.json` file, with schema validation against the required tables (`assets.csv`, `vulnerabilities.csv`, `threat_events.csv`, `controls.csv`, `asset_controls.csv`). A one-click "Use Demo Dataset" option is available for evaluation without needing your own data.
 - **Actuarial Monte Carlo Simulation:** 20,000 iterations per asset using EPSS exploit probabilities, CVSS severity scores, and empirical threat event frequencies derived from historical telemetry.
 - **Financial Risk Metrics:** Computes Expected Annual Loss (EAL), 95%/99% Value at Risk (VaR), and Loss Exceedance Curves (LEC) — at asset, business-unit, and organization level.
+- **AI/ML Vulnerability Exploitation Forecasting:** Supervised machine learning engine combining **Random Forest** and **XGBoost** classifiers trained on 10 telemetry features (CVSS, EPSS 30d/annualized, asset criticality, data sensitivity tiers, deployed control coverage, threat event frequency, vulnerability age, and financial exposure). Evaluated with 5-fold cross-validation, feature importance rankings, and per-CVE exploit probability forecasting.
+- **Multi-Framework Compliance Mapping & Gap Analysis:** Automated cross-mapping of deployed controls to 5 major regulatory and industry standards:
+  - **ISO/IEC 27001:2022 Annex A** (Organizational, People, Physical, Technological)
+  - **NIST CSF 2.0** (Govern, Identify, Protect, Detect, Respond, Recover)
+  - **CIS Critical Security Controls v8.1** (Basic, Foundational, Organizational)
+  - **RBI Cyber Security Framework** (2016 Circular + 2023 Master Direction for BFSI)
+  - **SEBI CSCRF** (Cybersecurity & Cyber Resilience Framework, Aug 2024)
+  Provides radar chart visualization, compliance coverage percentages, and prioritized remediation gaps with recommended controls and costs.
+- **Investment Frontier Curve & Knee-Point Detection:** Solves multi-budget Knapsack ILP to construct the Pareto-optimal **Investment vs. Risk Reduction curve**. Automatically computes the **knee / elbow point** (maximum geometric curvature) where security ROI begins to see diminishing returns, benchmarked live against naive greedy heuristics.
+- **Dynamic Risk Trend Analysis:** Historical risk trajectory modeling showing Expected Annual Loss (EAL), VaR95, and control adoption over time, providing visibility into organizational security posture maturation.
 - **ROSI Benchmark Analytics:** Dollar-for-dollar Return on Security Investment for both currently deployed and candidate controls (EDR, MFA, Network Segmentation, Patching, SIEM), computed via full before/after re-simulation, not a flat formula.
 - **Knapsack ILP Investment Optimizer:** Solves an exact budget-constrained 0/1 knapsack optimization to identify the mathematically optimal set of security investments, benchmarked against a naive greedy (sort-by-ROSI) baseline.
 - **AI Risk Copilot:** An embedded conversational assistant with live access to the organization's quantified risk metrics, able to answer natural-language questions like "What's our biggest risk right now?"
-- **Responsive Dashboard:** Executive and technical views with drill-down asset inspection, business-unit risk charts, and a live "what-if budget" optimizer panel.
+- **Responsive Dashboard:** Executive and technical views with drill-down asset inspection, business-unit risk charts, compliance radar, ML exploitation toggles, investment frontier curves, and a live "what-if budget" optimizer panel.
 
 ---
 
@@ -45,6 +55,7 @@ Users can upload their own enterprise cyber telemetry (5 CSV files, a ZIP bundle
 
 - **Frontend:** React 18, Vite, TailwindCSS, Recharts, Lucide Icons, Axios, React Router DOM
 - **Backend:** Python 3.10+, FastAPI, Uvicorn, Pydantic, python-multipart (file upload handling)
+- **Machine Learning & Predictive Modeling:** Scikit-learn (Random Forest Classifier, Cross-Validation), XGBoost (Gradient Boosted Trees)
 - **Quantitative Engine & Mathematics:** NumPy, SciPy, Pandas, PyArrow (Parquet), PuLP (COIN-OR CBC ILP Solver)
 - **AI / LLM:** Google Gemini API, called from the backend (never exposed to the browser) with the live computed risk data supplied as context for each query
 - **Database:** See note below
@@ -65,26 +76,41 @@ User / Browser
       │
       ▼
 React Dashboard & Dataset Upload Portal (Vite + Tailwind + Recharts)
+      ├── Executive Overview & Risk Trend Visualizer
+      ├── Asset Portfolio & ML Exploit Predictor Panel
+      ├── Controls ROSI & Investment Frontier Curve
+      ├── Multi-Framework Compliance Radar & Gap Remediation
+      └── Embedded AI Risk Copilot
       │
       ▼ (REST API / CORS)
 FastAPI Backend (api/main.py)
-      ├── /api/datasets/upload   (dataset ingestion & schema validation)
-      ├── /risk/*                (asset, business-unit, org risk summaries + loss curves)
-      ├── /controls/*            (ROSI rankings & Knapsack ILP optimizer)
-      └── /chat                  (AI Risk Copilot assistant)
+      ├── /api/datasets/upload         (dataset ingestion & schema validation)
+      ├── /risk/*                      (asset, business-unit, org risk summaries + loss curves)
+      ├── /risk/trend                  (historical risk trajectory & EAL reduction trends)
+      ├── /controls/*                  (ROSI rankings & Knapsack ILP optimizer)
+      ├── /controls/frontier           (multi-budget investment frontier & knee-point analysis)
+      ├── /predictions/vulnerabilities (ML-based RF/XGBoost exploit probability predictions)
+      ├── /compliance/posture          (ISO 27001, NIST CSF, CIS, RBI, SEBI posture scores)
+      ├── /compliance/gaps             (framework gap analysis & prioritized remediation)
+      └── /chat                        (AI Risk Copilot assistant)
       │
       ▼
-FAIR-Based Risk Quantification Pipeline (risk_engine/)
-  ├── Ingestion & Normalization
-  ├── Likelihood (EPSS/CVSS-based)
-  ├── Threat Event Frequency
-  ├── Loss Magnitude (lognormal)
-  ├── 20k-iteration Monte Carlo Simulation
-  ├── Control Scenarios & ROSI
-  └── Knapsack ILP Investment Optimizer
+FAIR & ML Quantitative Risk Pipeline (risk_engine/)
+  ├── Phase A: Ingestion & Schema Normalization (ingest.py)
+  ├── Phase B: Likelihood Modeling (likelihood.py)
+  ├── Phase C: Threat Event Frequency Estimation (frequency.py)
+  ├── Phase D: Lognormal Loss Calibration (loss_magnitude.py)
+  ├── Phase E: 20k-iteration Monte Carlo Simulation (simulate.py)
+  ├── Phase F: Risk Aggregation (aggregate.py)
+  ├── Phase G: Control Scenario Re-simulation & ROSI (control_scenarios.py)
+  ├── Phase H: Knapsack ILP Investment Optimization (investment_optimizer.py)
+  ├── Phase I: Supervised ML Vulnerability Exploitation Modeling (predictor.py)
+  ├── Phase J: Multi-Period Risk Trend Synthesis (trend_generator.py)
+  ├── Phase K: Investment Frontier Curve & Elbow Solver (frontier.py)
+  └── Phase L: Regulatory Compliance Matrix Mapping (framework_mapper.py)
       │
       ▼
-Computed Risk Outputs (Parquet) → returned to Frontend Dashboard & AI Copilot
+Computed Risk Outputs (Parquet & JSON) → returned to Frontend Dashboard & AI Copilot
 ```
 
 See [docs/architecture.md](docs/architecture.md) for the detailed component breakdown.
@@ -101,7 +127,7 @@ SIH2026/
 │   │   ├── main.py                    # FastAPI root & route definitions
 │   │   ├── upload.py                  # Dataset upload & schema validation endpoints
 │   │   └── chat.py                    # AI Copilot assistant endpoint
-│   ├── risk_engine/                   # Open FAIR quantitative pipeline
+│   ├── risk_engine/                   # Quantitative & ML pipeline
 │   │   ├── config.py                  # Actuarial constants & benchmarks
 │   │   ├── ingest.py                  # Raw CSV validation & normalization
 │   │   ├── likelihood.py              # Vulnerability & EPSS modeling
@@ -111,11 +137,17 @@ SIH2026/
 │   │   ├── aggregate.py               # EAL, VaR95, VaR99 calculation
 │   │   ├── control_scenarios.py       # Before/after control ROSI evaluation
 │   │   ├── investment_optimizer.py    # Knapsack ILP optimization solver
+│   │   ├── predictor.py               # ML Vulnerability Exploit Predictor (RF & XGBoost)
+│   │   ├── frontier.py                # Investment Frontier & Knee-Point curve solver
+│   │   ├── trend_generator.py         # Multi-month historical risk trend generator
+│   │   ├── framework_mapper.py        # ISO 27001, NIST CSF, CIS, RBI, SEBI mapper
 │   │   └── pipeline.py                # End-to-end pipeline orchestrator
-│   ├── data/                          # Sample/demo input datasets (5 CSVs)
-│   ├── outputs/                       # Computed risk Parquet datasets (gitignored)
+│   ├── data/                          # Sample datasets & compliance mappings
+│   │   ├── compliance_mappings.json   # Regulatory framework requirement mappings
+│   │   └── *.csv                      # 5 standard telemetry CSV inputs
+│   ├── outputs/                       # Computed risk & ML Parquet datasets (gitignored)
 │   ├── tests/                         # Pytest test suite
-│   └── requirements.txt               # Backend Python dependencies
+│   └── requirements.txt               # Backend Python dependencies (incl. scikit-learn, xgboost)
 ├── src/frontend/                          # React + Vite frontend application
 │   ├── src/
 │   │   ├── api/client.js              # Axios API client & formatters
@@ -123,7 +155,8 @@ SIH2026/
 │   │   ├── hooks/useApi.js            # Custom async data-fetching hook
 │   │   ├── components/
 │   │   │   ├── home/                  # Hero, About, UploadDropzone, ProcessingOverlay
-│   │   │   ├── dashboard/             # ExecutiveSummary, BUChart, AssetTable, Optimizer
+│   │   │   ├── dashboard/             # ExecutiveSummary, BUChart, AssetTable, Optimizer,
+│   │   │   │                          # ComplianceDashboard, InvestmentFrontierChart, RiskTrendChart
 │   │   │   ├── chatbot/               # ChatWidget, ChatWindow, ChatMessage
 │   │   │   ├── layout/                # Header navigation & theme toggle
 │   │   │   └── ui/                    # Button, Card, Badge design primitives
@@ -146,8 +179,9 @@ SIH2026/
 
 | Item | Location |
 |---|---|
-| Backend source code (risk engine, API) | `src/backend/` |
-| Frontend source code (dashboard, upload portal, chatbot) | `src/frontend/` |
+| Backend source code (risk engine, ML predictors, compliance, API) | `src/backend/` |
+| Frontend source code (dashboard, frontier charts, compliance UI, chatbot) | `src/frontend/` |
+| Regulatory compliance matrix mappings | `src/backend/data/compliance_mappings.json` |
 | Technical documentation & architecture | `docs/architecture.md` |
 | Project screenshots | `assets/screenshots/` |
 | Final PPT / presentation | `submission/PRESENTATION.md` |
@@ -169,38 +203,31 @@ Keep your final SIH presentation in the repository:
 
 ---
 
-## 10. Screenshots / Prototype Photos
+## 10. Screenshots / Prototype Walkthrough
 
 Visual demonstration screenshots and UI walkthroughs are located in:
 - [assets/screenshots/](assets/screenshots/)
 
-### Home — Dataset Upload & Overview
-![Home](assets/screenshots/01-home.png)
+### 1. Home — Dataset Upload & Ingestion
 Landing page with the drag-and-drop dataset ingestion pipeline, live schema validation for all 5 required tables, and a one-click demo dataset option.
 
-### Executive Overview Dashboard
-![Executive Dashboard](assets/screenshots/02-dashboard.png)
-Organization-wide Expected Annual Loss, Value at Risk (95%/99%), risk exposure by business unit, and security controls ranked by ROSI — computed via 10,000-iteration Monte Carlo simulation.
+### 2. Executive Overview & Risk Trend Analysis
+Organization-wide Expected Annual Loss (EAL), Value at Risk (95%/99%), exposure by business unit, top controls ranked by ROSI, and a **Risk Trend Analysis** chart tracking 6-month historical loss trajectories as security posture matures.
 
-### Asset Portfolio
-![Asset Portfolio](assets/screenshots/03-asset-portfolio.png)
-Sortable, searchable asset-level risk table with EAL, VaR95, and priority scoring across all business units.
+### 3. Asset Portfolio & AI/ML Exploit Predictor
+Sortable, searchable asset-level risk table with EAL, VaR95, priority scoring, and an interactive drilldown panel displaying **Random Forest and XGBoost vulnerability exploitation predictions** (30-day exploit probability per CVE) alongside the Loss Exceedance Curve (LEC).
 
-### Investment Optimizer
-![Investment Optimizer](assets/screenshots/04-investment-optimizer.png)
-Budget-constrained Integer Linear Programming (Knapsack ILP) optimizer, benchmarked live against a naive greedy baseline — demonstrating measurably better risk reduction from exact optimization.
+### 4. Regulatory Compliance Dashboard
+Comprehensive compliance coverage radar and framework posture cards mapping deployed controls across **ISO/IEC 27001:2022**, **NIST CSF 2.0**, **CIS Controls v8.1**, **RBI Cyber Security Framework**, and **SEBI CSCRF**, complete with a prioritized gap remediation matrix.
 
-### Asset Risk Detail — Loss Exceedance Curve
-![Asset Detail](assets/screenshots/05-asset-detail.png)
-Per-asset drill-down showing the full Loss Exceedance Curve derived from the Monte Carlo simulation.
+### 5. Investment Frontier Curve & Knee-Point Optimizer
+The **Investment vs. Risk Reduction Efficient Frontier** chart plotting Pareto-optimal risk reduction against varying budget levels. Automatically highlights the **Knee / Elbow Point** where diminishing returns begin and visualizes the mathematical optimization edge of Integer Linear Programming over naive greedy sorting.
 
-### Recommended Implementation Plan
-![Recommended Actions](assets/screenshots/06-recommended-actions.png)
-The optimizer's concrete asset-to-control action plan, with implementation cost, risk reduction, and ROSI per action.
+### 6. Recommended Implementation Action Plan
+The optimizer's concrete asset-to-control action plan, showing exact budget allocation, estimated implementation cost, financial risk reduction, and ROSI per recommended control.
 
-### AI Risk Copilot
-![AI Chatbot](assets/screenshots/07-ai-chatbot.png)
-Conversational assistant with live access to the organization's quantified risk metrics, answering natural-language questions about financial cyber risk.
+### 7. AI Risk Copilot
+Conversational assistant with live context access to the organization's quantified risk metrics, predictive scores, and compliance posture, answering natural-language queries about financial cyber risk.
 
 ---
 
@@ -269,7 +296,7 @@ pytest -v
 
 - **Persistent, Multi-User Data Layer:** Migrate from the current local/session storage prototype to PostgreSQL (relational asset/vulnerability/control data) plus object storage (raw uploads and Parquet outputs), as detailed under Technology Stack above.
 - **Real-Time SIEM & EDR Webhook Ingestion:** Direct streaming connectors for tools like Splunk, Microsoft Sentinel, and CrowdStrike Falcon for continuous automated EAL recalculation instead of manual dataset upload.
-- **Compliance Framework Mapping:** Built-in mapping of findings and controls to ISO/IEC 27001, NIST CSF, CIS Controls, RBI Cyber Security Framework, and SEBI CSCRF, with auto-generated audit-ready reports.
+- **Automated Regulatory Reporting Exports:** One-click generation of audit-ready compliance filing reports (PDF/XBRL) specifically formatted for RBI Cyber Security audits and SEBI CSCRF annual submissions.
 - **Modeling Correlated/Systemic Risk:** Move beyond the current independence assumption for EAL/VaR aggregation to account for events (e.g. ransomware) that can affect multiple assets simultaneously.
 - **Multi-Tenant Enterprise RBAC:** Role-based access control with granular organizational permissions for large enterprise fleets.
 - **Cloud Infrastructure Auto-Discovery:** Automated asset synchronization with AWS, Azure, and GCP asset inventories.
