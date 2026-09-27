@@ -1,51 +1,51 @@
 asset_id,hostname,business_unit,criticality,data_sensitivity_tier,financial_value_usd,downtime_cost_per_hour_usd,regulatory_penalty_potential_usd,os
-AST-1000,host-34-engineering.internal,HR,1,Public,63296,4526,0,RHEL 8
-AST-1001,host-28-sales.internal,Engineering,1,Public,21765,1116,0,Windows Server 2019
-AST-1002,host-64-operations.internal,Operations,2,Public,94450,6056,0,RHEL 8
-AST-1003,host-30-operations.internal,HR,4,Restricted,63812,18124,50000,Ubuntu 22.04
-AST-1004,host-28-finance.internal,Sales,5,Restricted,372300,24870,250000,Windows 10
-AST-1005,host-19-hr.internal,Finance,3,Internal,276684,12579,0,RHEL 8
-AST-1006,host-45-engineering.internal,Finance,1,Public,98270,1185,0,Windows 10
-AST-1007,host-10-hr.internal,HR,3,Internal,220425,3177,0,Ubuntu 22.04
-AST-1008,host-49-hr.internal,Sales,3,Internal,122694,9210,0,Windows 10
-AST-1009,host-24-finance.internal,Engineering,3,Internal,54141,11442,0,RHEL 8
-AST-1010,host-51-finance.internal,HR,4,Restricted,69472,18916,50000,Ubuntu 22.04
-AST-1011,host-38-finance.internal,HR,3,Internal,287223,5253,0,Windows Server 2019
-AST-1012,host-99-finance.internal,Engineering,3,Internal,88125,14964,0,RHEL 8
-AST-1013,host-24-operations.internal,Sales,4,Restricted,166240,19932,250000,RHEL 8
-AST-1014,host-74-operations.internal,Finance,3,Internal,49689,4440,0,RHEL 8
-AST-1015,host-35-operations.internal,Finance,3,Internal,238176,8577,0,RHEL 8
-AST-1016,host-24-sales.internal,Sales,2,Public,170206,2232,0,RHEL 8
-AST-1017,host-85-operations.internal,Sales,1,Public,49885,2041,0,Ubuntu 22.04
-AST-1018,host-95-operations.internal,Sales,5,Restricted,337065,18115,0,RHEL 8
-AST-1019,host-88-sales.internal,Operations,2,Public,191538,9060,0,Windows Server 2019
-AST-1020,host-70-hr.internal,HR,3,Internal,36903,3945,0,Ubuntu 22.04
-AST-1021,host-42-sales.internal,Engineering,4,Confidential,134300,4860,250000,Windows Server 2019
-AST-1022,host-57-engineering.internal,Operations,2,Public,69906,2124,0,Windows Server 2019
-AST-1023,host-72-sales.internal,Sales,3,Internal,136014,13281,0,Windows Server 2019
-AST-1024,host-53-finance.internal,HR,3,Internal,143886,10665,0,RHEL 8
-AST-1025,host-10-hr.internal,Finance,3,Internal,114570,12468,0,Windows 10
-AST-1026,host-52-sales.internal,HR,4,Restricted,93804,9100,1000000,Windows Server 2019
-AST-1027,host-88-operations.internal,Operations,3,Internal,151590,9321,0,Ubuntu 22.04
-AST-1028,host-96-sales.internal,Sales,2,Public,63880,9194,0,Windows Server 2019
-AST-1029,host-66-sales.internal,Engineering,2,Public,115602,6588,0,Windows 10
-AST-1030,host-27-operations.internal,Operations,3,Internal,143787,3177,0,Windows 10
-AST-1031,host-10-operations.internal,HR,2,Public,151596,7120,0,Windows Server 2019
-AST-1032,host-77-sales.internal,Finance,4,Restricted,325996,5096,250000,Ubuntu 22.04
-AST-1033,host-51-sales.internal,HR,1,Public,50239,4389,0,RHEL 8
-AST-1034,host-73-sales.internal,Engineering,4,Confidential,392532,15520,50000,Windows 10
-AST-1035,host-80-hr.internal,Finance,3,Internal,137970,10221,0,Windows 10
-AST-1036,host-38-engineering.internal,Engineering,5,Confidential,100540,12505,50000,Ubuntu 22.04
-AST-1037,host-96-finance.internal,Sales,2,Public,159956,6240,0,Ubuntu 22.04
-AST-1038,host-57-hr.internal,HR,3,Internal,70095,4269,0,Windows 10
-AST-1039,host-26-engineering.internal,Finance,3,Internal,224709,7095,0,RHEL 8
-AST-1040,host-57-finance.internal,Sales,5,Confidential,313935,16695,0,RHEL 8
-AST-1041,host-59-operations.internal,HR,4,Confidential,244920,12812,0,RHEL 8
-AST-1042,host-64-engineering.internal,Operations,1,Public,26240,4429,0,Windows Server 2019
-AST-1043,host-10-sales.internal,Operations,4,Restricted,240116,5184,250000,Windows 10
-AST-1044,host-90-hr.internal,HR,1,Public,82539,2814,0,Ubuntu 22.04
-AST-1045,host-63-finance.internal,Sales,2,Public,92772,9194,0,Windows 10
-AST-1046,host-47-engineering.internal,Engineering,4,Confidential,372028,8856,1000000,RHEL 8
-AST-1047,host-66-hr.internal,Sales,3,Internal,243615,9873,0,Ubuntu 22.04
-AST-1048,host-15-hr.internal,HR,3,Internal,139050,5034,0,Windows Server 2019
-AST-1049,host-85-sales.internal,HR,4,Confidential,68608,18548,50000,Ubuntu 22.04
+AST-1000,host-77-sales.internal,Operations,3,Internal,204222,5964,0,Windows 10
+AST-1001,host-19-finance.internal,Sales,2,Public,183678,4642,0,RHEL 8
+AST-1002,host-96-sales.internal,Operations,3,Internal,215985,12654,0,Windows Server 2019
+AST-1003,host-89-hr.internal,Sales,1,Public,83261,3389,0,RHEL 8
+AST-1004,host-20-hr.internal,Operations,1,Public,86420,2682,0,Windows Server 2019
+AST-1005,host-18-sales.internal,Finance,2,Public,157986,7682,0,RHEL 8
+AST-1006,host-44-hr.internal,Operations,4,Confidential,132596,5692,1000000,RHEL 8
+AST-1007,host-15-operations.internal,Operations,1,Public,20721,1478,0,Windows 10
+AST-1008,host-58-sales.internal,Operations,3,Internal,93915,7230,0,Ubuntu 22.04
+AST-1009,host-17-hr.internal,Sales,3,Internal,222156,9267,0,Ubuntu 22.04
+AST-1010,host-44-engineering.internal,HR,5,Restricted,242855,22020,0,Windows 10
+AST-1011,host-47-finance.internal,Sales,3,Internal,103989,12162,0,Ubuntu 22.04
+AST-1012,host-78-hr.internal,HR,4,Restricted,385172,10884,250000,Windows 10
+AST-1013,host-72-operations.internal,Finance,3,Internal,32409,12606,0,RHEL 8
+AST-1014,host-95-hr.internal,Operations,2,Public,189456,7018,0,Windows Server 2019
+AST-1015,host-71-sales.internal,Sales,3,Internal,277521,12528,0,Windows Server 2019
+AST-1016,host-44-hr.internal,HR,4,Confidential,67284,12460,0,Ubuntu 22.04
+AST-1017,host-40-operations.internal,Finance,3,Internal,223920,3666,0,Windows Server 2019
+AST-1018,host-92-sales.internal,Engineering,2,Public,39236,2414,0,RHEL 8
+AST-1019,host-73-sales.internal,HR,4,Confidential,196036,19148,1000000,Windows Server 2019
+AST-1020,host-26-hr.internal,Sales,2,Public,117086,5564,0,RHEL 8
+AST-1021,host-21-sales.internal,Engineering,2,Public,106894,6376,0,Windows 10
+AST-1022,host-77-operations.internal,Sales,4,Restricted,159716,6888,250000,Ubuntu 22.04
+AST-1023,host-71-engineering.internal,Sales,3,Internal,153240,12012,0,RHEL 8
+AST-1024,host-55-hr.internal,HR,2,Public,131906,4994,0,Windows Server 2019
+AST-1025,host-55-finance.internal,Sales,5,Restricted,359930,24225,1000000,Windows Server 2019
+AST-1026,host-93-finance.internal,HR,5,Restricted,180590,9035,1000000,RHEL 8
+AST-1027,host-91-engineering.internal,Finance,3,Internal,126558,7251,0,Windows 10
+AST-1028,host-75-engineering.internal,Operations,3,Internal,89076,4692,0,Ubuntu 22.04
+AST-1029,host-79-finance.internal,Engineering,3,Internal,148827,13605,0,Windows Server 2019
+AST-1030,host-10-sales.internal,Finance,3,Internal,65613,13602,0,Windows 10
+AST-1031,host-33-finance.internal,Engineering,3,Internal,178377,13335,0,RHEL 8
+AST-1032,host-90-hr.internal,Engineering,5,Restricted,292575,5045,1000000,Windows 10
+AST-1033,host-94-finance.internal,Engineering,4,Restricted,232288,5360,1000000,Windows Server 2019
+AST-1034,host-11-operations.internal,HR,4,Confidential,52024,11004,1000000,Windows 10
+AST-1035,host-99-finance.internal,Sales,2,Public,137780,5322,0,RHEL 8
+AST-1036,host-41-finance.internal,HR,4,Confidential,162120,14344,50000,RHEL 8
+AST-1037,host-93-engineering.internal,Finance,4,Confidential,190296,19252,0,Ubuntu 22.04
+AST-1038,host-65-sales.internal,Engineering,3,Internal,126369,5670,0,Windows Server 2019
+AST-1039,host-74-engineering.internal,Operations,4,Restricted,142336,14584,1000000,Ubuntu 22.04
+AST-1040,host-41-hr.internal,Finance,2,Public,168254,7304,0,Windows 10
+AST-1041,host-65-hr.internal,Sales,4,Restricted,220636,15604,0,Ubuntu 22.04
+AST-1042,host-12-sales.internal,Sales,3,Internal,244224,4509,0,Windows 10
+AST-1043,host-78-sales.internal,Engineering,5,Confidential,54160,6740,250000,Ubuntu 22.04
+AST-1044,host-33-finance.internal,Engineering,1,Public,13424,1167,0,Ubuntu 22.04
+AST-1045,host-97-engineering.internal,Operations,1,Public,14493,3211,0,Ubuntu 22.04
+AST-1046,host-41-hr.internal,Engineering,3,Internal,180495,13608,0,RHEL 8
+AST-1047,host-53-finance.internal,HR,3,Internal,155787,12792,0,Windows 10
+AST-1048,host-50-sales.internal,HR,1,Public,25378,1062,0,RHEL 8
+AST-1049,host-47-operations.internal,Sales,5,Restricted,216870,12175,50000,Windows Server 2019

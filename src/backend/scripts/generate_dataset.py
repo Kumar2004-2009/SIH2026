@@ -109,42 +109,51 @@ def generate_threat_events(assets, num_events=200):
 def generate_controls():
     """
     Security control catalog with GENUINE cost/effectiveness trade-offs.
-
-    Deliberately avoid any single control being both the cheapest AND the
-    most effective — that creates a "dominant" option that always wins,
-    which collapses the budget-constrained optimization into a trivial
-    problem where a greedy sort-by-ROSI heuristic always matches the exact
-    ILP optimum (no real knapsack trade-off ever occurs). With the values
-    below, different budgets should produce different optimal combinations.
+    Reads from compliance_mappings.json.
     """
-    return [
-        {"control_id": "CTRL-01", "name": "Endpoint Detection & Response (EDR)", "risk_reduction_pct": 0.75, "cost_usd": 45000},
-        {"control_id": "CTRL-02", "name": "Multi-Factor Authentication (MFA)", "risk_reduction_pct": 0.60, "cost_usd": 15000},
-        {"control_id": "CTRL-03", "name": "Network Segmentation", "risk_reduction_pct": 0.90, "cost_usd": 95000},
-        {"control_id": "CTRL-04", "name": "Regular Patching Program", "risk_reduction_pct": 0.55, "cost_usd": 18000},
-        {"control_id": "CTRL-05", "name": "Security Information & Event Management (SIEM)", "risk_reduction_pct": 0.80, "cost_usd": 65000},
-    ]
+    import json
+    from pathlib import Path
+    
+    data_dir = Path(__file__).resolve().parent.parent / "data"
+    mappings_file = data_dir / "compliance_mappings.json"
+    
+    controls = []
+    if mappings_file.exists():
+        with open(mappings_file, "r") as f:
+            data = json.load(f)
+        for ctrl_id, ctrl_data in data.get("control_mappings", {}).items():
+            controls.append({
+                "control_id": ctrl_id,
+                "name": ctrl_data["name"],
+                "risk_reduction_pct": ctrl_data.get("risk_reduction_pct", 0.5),
+                "cost_usd": ctrl_data.get("cost_usd", 10000)
+            })
+    else:
+        controls = [
+            {"control_id": "CTRL-01", "name": "Endpoint Detection & Response (EDR)", "risk_reduction_pct": 0.75, "cost_usd": 45000},
+            {"control_id": "CTRL-02", "name": "Multi-Factor Authentication (MFA)", "risk_reduction_pct": 0.60, "cost_usd": 15000},
+            {"control_id": "CTRL-03", "name": "Network Segmentation", "risk_reduction_pct": 0.90, "cost_usd": 95000},
+            {"control_id": "CTRL-04", "name": "Regular Patching Program", "risk_reduction_pct": 0.55, "cost_usd": 18000},
+            {"control_id": "CTRL-05", "name": "Security Information & Event Management (SIEM)", "risk_reduction_pct": 0.80, "cost_usd": 65000},
+        ]
+    return controls
 
 
 def generate_asset_controls(assets, controls):
     """
     Creates a mapping of which controls are CURRENTLY deployed on which assets.
-    This provides the baseline for residual risk calculation and future optimization.
-
-    Deployment likelihood scales with asset criticality (higher-criticality
-    assets are more likely to already have some controls deployed) rather
-    than being purely uniform-random — this is more realistic (important
-    systems tend to get attention first) and avoids an unrealistically flat
-    deployment pattern across the whole asset base.
     """
     deployed_controls = []
+    
+    # Randomly select a subset of controls that this organization actually owns.
+    # If they only own 12 out of 20 controls, the other 8 will guarantee organizational gaps!
+    org_owned_controls = random.sample(controls, k=12)
+    
     for asset in assets:
-        # Base probability that each individual control is already deployed
-        # on this asset, scaled by criticality (1 -> ~0.08, 5 -> ~0.40).
-        deploy_probability = 0.08 * asset["criticality"]
+        deploy_probability = 0.15 * (asset["criticality"] / 5.0)
 
         selected_controls = [
-            ctrl for ctrl in controls if random.random() < deploy_probability
+            ctrl for ctrl in org_owned_controls if random.random() < deploy_probability
         ]
 
         for ctrl in selected_controls:

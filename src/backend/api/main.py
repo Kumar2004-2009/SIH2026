@@ -15,6 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from risk_engine.investment_optimizer import optimize_investments
+from risk_engine.frontier import compute_frontier
+from risk_engine.framework_mapper import get_compliance_posture, get_compliance_gaps
 from api.chat import router as chat_router
 from api.upload import router as upload_router
 
@@ -190,5 +192,93 @@ def get_optimal_investment_plan(
             "greedy_comparison": result["greedy_comparison"],
             "selected_actions": result["selected"].to_dict(orient="records"),
         }
+    except Exception as e:
+        _handle_load_error(e)
+
+
+# ---------------------------------------------------------------------------
+# Compliance Framework Mapping Endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/compliance/posture")
+def get_compliance_posture_endpoint():
+    """Returns compliance coverage posture across all mapped frameworks."""
+    try:
+        # Get deployed control IDs from asset_controls in the ingested data
+        data_dir = Path(__file__).resolve().parent.parent / "data"
+        asset_controls_path = data_dir / "asset_controls.csv"
+
+        deployed_ids = set()
+        if asset_controls_path.exists():
+            ac_df = pd.read_csv(asset_controls_path)
+            if "control_id" in ac_df.columns:
+                deployed_ids = set(ac_df["control_id"].unique())
+
+        posture = get_compliance_posture(deployed_ids)
+        return posture
+    except Exception as e:
+        logger.exception("Error computing compliance posture")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/compliance/gaps")
+def get_compliance_gaps_endpoint():
+    """Returns compliance gaps — framework requirements not covered by deployed controls."""
+    try:
+        data_dir = Path(__file__).resolve().parent.parent / "data"
+        asset_controls_path = data_dir / "asset_controls.csv"
+
+        deployed_ids = set()
+        if asset_controls_path.exists():
+            ac_df = pd.read_csv(asset_controls_path)
+            if "control_id" in ac_df.columns:
+                deployed_ids = set(ac_df["control_id"].unique())
+
+        gaps = get_compliance_gaps(deployed_ids)
+        return gaps
+    except Exception as e:
+        logger.exception("Error computing compliance gaps")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# Investment Efficient Frontier Endpoint
+# ---------------------------------------------------------------------------
+
+@app.get("/controls/frontier")
+def get_investment_frontier():
+    """Returns the efficient frontier data — optimizer results at multiple budget levels."""
+    try:
+        scenarios = load_parquet("control_scenario_results.parquet")
+        frontier = compute_frontier(scenarios)
+        return frontier
+    except Exception as e:
+        _handle_load_error(e)
+
+
+# ---------------------------------------------------------------------------
+# Risk Trend Endpoint
+# ---------------------------------------------------------------------------
+
+@app.get("/risk/trend")
+def get_risk_trend():
+    """Returns historical risk trend data for visualization."""
+    try:
+        df = load_parquet("risk_trend.parquet")
+        return df.to_dict(orient="records")
+    except Exception as e:
+        _handle_load_error(e)
+
+
+# ---------------------------------------------------------------------------
+# ML Predictions Endpoint
+# ---------------------------------------------------------------------------
+
+@app.get("/predictions/vulnerabilities")
+def get_vuln_predictions():
+    """Returns ML vulnerability exploitation predictions."""
+    try:
+        df = load_parquet("vuln_predictions.parquet")
+        return df.to_dict(orient="records")
     except Exception as e:
         _handle_load_error(e)

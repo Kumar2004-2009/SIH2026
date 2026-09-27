@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, ArrowDown, Activity, DollarSign, TrendingUp, Sparkles } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 
 export const HeroSection = ({ onScrollToUpload, onQuickDemo, isProcessingDemo }) => {
+  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 text-center">
       {/* Background ambient glow */}
@@ -46,7 +48,7 @@ export const HeroSection = ({ onScrollToUpload, onQuickDemo, isProcessingDemo })
           <Button
             variant="secondary"
             size="lg"
-            onClick={() => { window.location.href = "/insights" }}
+            onClick={() => navigate('/insights')}
             isLoading={isProcessingDemo}
             className="px-6 py-3 font-semibold"
           >

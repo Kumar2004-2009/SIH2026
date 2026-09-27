@@ -15,7 +15,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { getAssetDetail, formatCurrency } from '../../api/client';
+import { getAssetDetail, getVulnPredictions, formatCurrency } from '../../api/client';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -24,6 +24,7 @@ export const AssetDetailPanel = ({ assetId, onClose }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mlTab, setMlTab] = useState('rf');
 
   useEffect(() => {
     if (!assetId) return;
@@ -32,10 +33,13 @@ export const AssetDetailPanel = ({ assetId, onClose }) => {
     setLoading(true);
     setError(null);
 
-    getAssetDetail(assetId)
-      .then((res) => {
+    Promise.all([getAssetDetail(assetId), getVulnPredictions()])
+      .then(([assetRes, vulnRes]) => {
         if (isMounted) {
-          setData(res);
+          const vulns = vulnRes?.data || vulnRes || [];
+          const assetVulns = Array.isArray(vulns) ? vulns.filter(v => v.asset_id === assetId) : [];
+          assetRes.predicted_vulnerabilities = assetVulns;
+          setData(assetRes);
           setLoading(false);
         }
       })
@@ -231,6 +235,67 @@ export const AssetDetailPanel = ({ assetId, onClose }) => {
                   </ResponsiveContainer>
                 </div>
               </Card>
+              
+              {/* Vulnerability Exploit Predictions */}
+              {data.predicted_vulnerabilities && data.predicted_vulnerabilities.length > 0 && (
+                <Card className="p-5 shadow-card space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-th-text-primary font-serif flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-th-warning" />
+                      Vulnerability Exploit Predictions (ML)
+                    </h4>
+                    <div className="flex items-center space-x-1 bg-th-bg rounded-lg p-1 border border-th-border">
+                      <button 
+                        onClick={() => setMlTab('rf')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${mlTab === 'rf' ? 'bg-th-surface border border-th-border text-th-brand shadow-sm' : 'text-th-text-secondary hover:text-th-text-primary'}`}
+                      >
+                        Random Forest
+                      </button>
+                      <button 
+                        onClick={() => setMlTab('xgb')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${mlTab === 'xgb' ? 'bg-th-surface border border-th-border text-th-brand shadow-sm' : 'text-th-text-secondary hover:text-th-text-primary'}`}
+                      >
+                        XGBoost
+                      </button>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="border-b border-th-border text-th-text-secondary text-xs">
+                        <tr>
+                          <th className="pb-2 font-medium">CVE</th>
+                          <th className="pb-2 font-medium">Severity</th>
+                          <th className="pb-2 font-medium">CVSS</th>
+                          <th className="pb-2 font-medium text-right">Exploit Prob (30d)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-th-border">
+                        {data.predicted_vulnerabilities.map((v, i) => {
+                          const prob = mlTab === 'xgb' && v.exploit_probability_xgb !== undefined 
+                            ? v.exploit_probability_xgb 
+                            : (v.exploit_probability_rf !== undefined ? v.exploit_probability_rf : v.exploit_probability);
+                          
+                          return (
+                          <tr key={i}>
+                            <td className="py-2 text-th-text-primary font-mono text-xs">{v.cve_id}</td>
+                            <td className="py-2">
+                              <Badge variant={v.severity?.toLowerCase() === 'critical' || v.severity?.toLowerCase() === 'high' ? 'danger' : 'warning'}>
+                                {v.severity}
+                              </Badge>
+                            </td>
+                            <td className="py-2 text-th-text-secondary">{v.cvss_score}</td>
+                            <td className="py-2 text-right">
+                              <span className={`font-semibold ${prob > 0.5 ? 'text-th-danger' : prob > 0.2 ? 'text-th-warning' : 'text-th-brand'}`}>
+                                {(prob * 100).toFixed(1)}%
+                              </span>
+                            </td>
+                          </tr>
+                        )})}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              )}
             </>
           ) : null}
         </div>

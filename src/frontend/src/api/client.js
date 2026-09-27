@@ -142,6 +142,46 @@ export const getDatasetStatus = async () => {
 };
 
 /**
+ * Compliance posture across frameworks
+ */
+export const getCompliancePosture = async () => {
+  const response = await apiClient.get('/compliance/posture');
+  return response.data;
+};
+
+/**
+ * Compliance gaps and uncovered requirements
+ */
+export const getComplianceGaps = async () => {
+  const response = await apiClient.get('/compliance/gaps');
+  return Array.isArray(response.data) ? response.data : [];
+};
+
+/**
+ * Investment efficient frontier data
+ */
+export const getInvestmentFrontier = async () => {
+  const response = await apiClient.get('/controls/frontier');
+  return response.data;
+};
+
+/**
+ * Risk trend over time
+ */
+export const getRiskTrend = async () => {
+  const response = await apiClient.get('/risk/trend');
+  return Array.isArray(response.data) ? response.data : [];
+};
+
+/**
+ * ML vulnerability predictions
+ */
+export const getVulnPredictions = async () => {
+  const response = await apiClient.get('/predictions/vulnerabilities');
+  return response.data;
+};
+
+/**
  * Currency formatter: $1,234,567
  */
 export const formatCurrency = (val) => {

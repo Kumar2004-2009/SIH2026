@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import pandas as pd
 
 from .config import EngineConfig, DEFAULT_CONFIG
 from .ingest import DataIngestor
@@ -9,6 +10,8 @@ from .loss_magnitude import LossMagnitudeModel
 from .simulate import MonteCarloSimulator
 from .aggregate import RiskAggregator
 from .control_scenarios import ControlScenarios
+from .predictor import VulnerabilityPredictor
+from .trend_generator import generate_risk_trend
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -60,10 +63,53 @@ class RiskPipeline:
         controls_df = raw_data["controls"]
         scenario_results = scenarios.evaluate_scenarios(df, controls_df)
         
-        # 8. Save Outputs
-        logger.info("Saving results to parquet...")
         out_dir = self.config.output_dir
         out_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Phase I: ML Vulnerability Exploitation Prediction
+        logger.info("Phase I: Training vulnerability exploitation predictor...")
+        predictor = VulnerabilityPredictor()
+        features, labels = predictor.prepare_features(raw_data)
+        if not features.empty:
+            metrics = predictor.train(features, labels)
+            logger.info(f"Predictor trained. Metrics: {metrics}")
+            predictions = predictor.predict(features)
+            
+            # Create a dataframe for predictions. We need asset_id and cve_id if possible.
+            vulns = raw_data.get("vulnerabilities")
+            if not isinstance(vulns, pd.DataFrame):
+                vulns = pd.DataFrame(vulns)
+            
+            if not vulns.empty:
+                vuln_preds = vulns.copy()
+                # Assuming order is preserved, which prepare_features does by merging
+                # Actually prepare_features merges, which might reorder. Let's just store features along with probability.
+                # Since prepare_features uses vulns.merge, let's just do that to get the same length and order:
+                assets = raw_data.get("assets", pd.DataFrame())
+                if not isinstance(assets, pd.DataFrame):
+                    assets = pd.DataFrame(assets)
+                if not assets.empty:
+                    merged = vulns.merge(assets, on="asset_id", suffixes=("", "_asset"))
+                    merged["exploit_probability_rf"] = predictions["random_forest"]
+                    merged["exploit_probability_xgb"] = predictions["xgboost"]
+                    # For backward compatibility with UI if it only expects one:
+                    merged["exploit_probability"] = predictions["random_forest"] 
+                    merged.to_parquet(out_dir / "vuln_predictions.parquet", index=False)
+                else:
+                    vuln_preds["exploit_probability_rf"] = predictions["random_forest"]
+                    vuln_preds["exploit_probability_xgb"] = predictions["xgboost"]
+                    vuln_preds["exploit_probability"] = predictions["random_forest"]
+                    vuln_preds.to_parquet(out_dir / "vuln_predictions.parquet", index=False)
+        else:
+            logger.info("No vulnerabilities found, skipping predictor.")
+
+        # Phase J: Generate Risk Trend History
+        logger.info("Phase J: Generating risk trend analysis...")
+        trend_df = generate_risk_trend(aggregates["org_risk_summary"], raw_data, self.config)
+        trend_df.to_parquet(out_dir / "risk_trend.parquet", index=False)
+        
+        # 8. Save Outputs
+        logger.info("Saving core results to parquet...")
         
         # Drop complex structures for parquet serialization where necessary
         asset_summary = aggregates["asset_risk_summary"].copy()

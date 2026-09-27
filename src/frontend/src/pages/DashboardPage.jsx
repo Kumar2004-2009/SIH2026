@@ -8,14 +8,18 @@ import { ControlsROIChart } from '../components/dashboard/ControlsROIChart';
 import { WhatIfOptimizer } from '../components/dashboard/WhatIfOptimizer';
 import { ChatWidget } from '../components/chatbot/ChatWidget';
 import { useApi } from '../hooks/useApi';
-import { getOrgRisk, getBusinessUnits, getAssets, getControlsRoi } from '../api/client';
+import { Card, CardContent } from '../components/ui/Card';
+import { ComplianceDashboard } from '../components/dashboard/ComplianceDashboard';
+import { RiskTrendChart } from '../components/dashboard/RiskTrendChart';
+import { InvestmentFrontierChart } from '../components/dashboard/InvestmentFrontierChart';
+import { getOrgRisk, getBusinessUnits, getAssets, getControlsRoi, getRiskTrend, getInvestmentFrontier } from '../api/client';
 import {
   Server,
   Zap,
   Award,
   Shield,
+  FileCheck
 } from 'lucide-react';
-import { Card, CardContent } from '../components/ui/Card';
 
 export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -27,6 +31,8 @@ export function DashboardPage() {
   const businessUnits = useApi(getBusinessUnits);
   const assets = useApi(getAssets);
   const controlsRoi = useApi(getControlsRoi);
+  const riskTrend = useApi(getRiskTrend);
+  const frontier = useApi(getInvestmentFrontier);
 
   const handleRefreshAll = async () => {
     setIsRefreshing(true);
@@ -36,6 +42,8 @@ export function DashboardPage() {
         businessUnits.refetch(),
         assets.refetch(),
         controlsRoi.refetch(),
+        riskTrend.refetch(),
+        frontier.refetch(),
       ]);
     } finally {
       setIsRefreshing(false);
@@ -88,6 +96,13 @@ export function DashboardPage() {
                 />
               </div>
             </div>
+
+            <RiskTrendChart
+              data={riskTrend.data}
+              loading={riskTrend.loading}
+              error={riskTrend.error}
+              onRetry={riskTrend.refetch}
+            />
           </div>
         )}
 
@@ -166,9 +181,22 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 4: WHAT-IF OPTIMIZER */}
+        {/* TAB 4: COMPLIANCE */}
+        {activeTab === 'compliance' && (
+          <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <ComplianceDashboard />
+          </div>
+        )}
+
+        {/* TAB 5: WHAT-IF OPTIMIZER */}
         {activeTab === 'optimizer' && (
           <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <InvestmentFrontierChart
+              data={frontier.data}
+              loading={frontier.loading}
+              error={frontier.error}
+              onRetry={frontier.refetch}
+            />
             <WhatIfOptimizer orgEal={orgEal} />
           </div>
         )}

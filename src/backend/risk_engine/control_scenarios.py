@@ -66,7 +66,7 @@ class ControlScenarios:
                 
                 # 4. Calculate ROI metrics
                 risk_reduction_usd = eal_before - eal_after
-                rosi = risk_reduction_usd / cost_usd if cost_usd > 0 else float('inf')
+                rosi = (risk_reduction_usd - cost_usd) / cost_usd if cost_usd > 0 else float('inf')
                 
                 results.append({
                     "control_id": control_id,

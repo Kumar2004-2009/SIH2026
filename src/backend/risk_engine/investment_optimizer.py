@@ -83,7 +83,14 @@ def optimize_investments(
         }
 
     prob = pulp.LpProblem("investment_optimization", pulp.LpMaximize)
-    x = [pulp.LpVariable(f"x_{i}", cat="Binary") for i in range(n)]
+    
+    # Handle pulp >= 4.0.0 vs older versions
+    if hasattr(prob, "add_variable"):
+        # pulp >= 4.0
+        x = [prob.add_variable(name=f"x_{i}", cat="Binary") for i in range(n)]
+    else:
+        # pulp < 4.0
+        x = [pulp.LpVariable(f"x_{i}", cat="Binary") for i in range(n)]
 
     # Objective: maximize total risk reduction
     prob += pulp.lpSum(df.loc[i, "Risk_Reduction_usd"] * x[i] for i in range(n))

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Shield, RefreshCw, Layers, Server, Sliders, Upload, BarChart3, Lock } from 'lucide-react';
+import { Shield, RefreshCw, Layers, Server, Sliders, Upload, BarChart3, Lock, Award, FileCheck, Zap } from 'lucide-react';
 import { getHealth } from '../../api/client';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Button } from '../ui/Button';
@@ -31,9 +31,11 @@ export const Header = ({ onRefreshAll, isRefreshing, activeTab, setActiveTab }) 
   }, []);
 
   const navItems = [
-    { id: 'overview', label: 'Executive Overview', icon: Layers },
+    { id: 'overview', label: 'Executive Overview', icon: BarChart3 },
     { id: 'assets', label: 'Asset Portfolio', icon: Server },
-    { id: 'optimizer', label: 'Investment Optimizer', icon: Sliders },
+    { id: 'controls', label: 'Controls', icon: Award },
+    { id: 'compliance', label: 'Compliance', icon: FileCheck },
+    { id: 'optimizer', label: 'Investment Optimizer', icon: Zap },
   ];
 
   const handleNavClick = (tabId) => {

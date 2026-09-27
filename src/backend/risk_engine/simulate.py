@@ -75,17 +75,23 @@ class MonteCarloSimulator:
         # LEF is a count of events, modeled via Poisson
         lef_samples = self.rng.poisson(expected_lef)
         
-        # 4. Loss Magnitude (Lognormal)
+        # 4. Loss Magnitude & 5. Annual Loss (Compound Poisson-Lognormal)
         mu = row.get("LM_lognormal_mu", 0.0)
         sigma = row.get("LM_lognormal_sigma", 0.75)
         
         if mu <= 0.0:
-            loss_mag_samples = np.zeros(n_sim)
+            annual_loss = np.zeros(n_sim)
         else:
-            loss_mag_samples = self.rng.lognormal(mu, sigma, size=n_sim)
-            
-        # 5. Annual Loss Calculation
-        annual_loss = lef_samples * loss_mag_samples
+            max_events = int(lef_samples.max()) if lef_samples.max() > 0 else 0
+            if max_events > 0:
+                # Draw max_events independent loss magnitudes per simulation
+                all_draws = self.rng.lognormal(mu, sigma, size=(n_sim, max_events))
+                # Mask: only sum draws up to actual event count per simulation
+                event_indices = np.arange(max_events)[None, :]  # shape (1, max_events)
+                mask = event_indices < lef_samples[:, None]       # shape (n_sim, max_events)
+                annual_loss = (all_draws * mask).sum(axis=1)
+            else:
+                annual_loss = np.zeros(n_sim)
         
         # 6. Summary Risk Metrics
         eal = float(np.mean(annual_loss))
