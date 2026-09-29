@@ -286,6 +286,49 @@ def get_vuln_predictions():
         _handle_load_error(e)
 
 
+@app.get("/predictions/threat-forecast")
+def get_threat_forecast(horizon_days: int = 14):
+    """
+    Returns sequential time neural network (LSTM) Threat Event Frequency (TEF) forecasts,
+    forward attack surge trajectories, and MITRE ATT&CK technique transition probabilities.
+    """
+    import json
+    forecast_file = OUTPUT_DIR / "threat_forecast.json"
+    
+    # If cached file exists, return it
+    if forecast_file.exists():
+        try:
+            with open(forecast_file, "r") as f:
+                data = json.load(f)
+            return data
+        except Exception as e:
+            logger.warning(f"Error reading cached threat_forecast.json: {e}")
+
+    # Otherwise compute on-the-fly from threat_events data
+    try:
+        from risk_engine.threat_forecaster import ThreatSequenceForecaster
+        data_dir = Path(__file__).resolve().parent.parent / "data"
+        threat_events_path = data_dir / "threat_events.csv"
+        
+        if not threat_events_path.exists():
+            raise HTTPException(status_code=404, detail="Threat events telemetry not found.")
+            
+        df = pd.read_csv(threat_events_path)
+        forecaster = ThreatSequenceForecaster(window_size=7, forecast_horizon=horizon_days)
+        result = forecaster.train_and_forecast(df)
+        
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        with open(forecast_file, "w") as f:
+            json.dump(result, f, indent=2)
+            
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error computing LSTM threat forecast")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ---------------------------------------------------------------------------
 # Asset Dependency & Systemic Risk (Active Directory Graph) Endpoints
 # ---------------------------------------------------------------------------

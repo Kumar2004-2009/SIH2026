@@ -182,6 +182,17 @@ export const getVulnPredictions = async () => {
 };
 
 /**
+ * Sequential LSTM Threat Event Frequency (TEF) & attack sequence forecast
+ * @param {number} horizonDays - Forecast window in days
+ */
+export const getThreatForecast = async (horizonDays = 14) => {
+  const response = await apiClient.get('/predictions/threat-forecast', {
+    params: { horizon_days: horizonDays },
+  });
+  return response.data;
+};
+
+/**
  * Live streaming threat events fallback REST endpoint
  */
 export const getRecentLiveEvents = async () => {

@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 import pandas as pd
 
+import json
 from .config import EngineConfig, DEFAULT_CONFIG
 from .ingest import DataIngestor
 from .likelihood import LikelihoodModel
@@ -12,6 +13,7 @@ from .aggregate import RiskAggregator
 from .control_scenarios import ControlScenarios
 from .predictor import VulnerabilityPredictor
 from .trend_generator import generate_risk_trend
+from .threat_forecaster import ThreatSequenceForecaster
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -108,6 +110,22 @@ class RiskPipeline:
         trend_df = generate_risk_trend(aggregates["org_risk_summary"], raw_data, self.config)
         trend_df.to_parquet(out_dir / "risk_trend.parquet", index=False)
         
+        # Phase K: Sequential LSTM Threat Event & Attack Sequence Forecasting
+        logger.info("Phase K: Training sequential LSTM threat event forecaster...")
+        threat_events_data = raw_data.get("threat_events")
+        if not isinstance(threat_events_data, pd.DataFrame):
+            threat_events_data = pd.DataFrame(threat_events_data)
+        
+        if not threat_events_data.empty:
+            forecaster = ThreatSequenceForecaster(window_size=7, forecast_horizon=14)
+            forecast_result = forecaster.train_and_forecast(threat_events_data)
+            forecast_path = out_dir / "threat_forecast.json"
+            with open(forecast_path, "w") as f:
+                json.dump(forecast_result, f, indent=2)
+            logger.info("LSTM threat forecasting completed and saved.")
+        else:
+            logger.info("No threat events telemetry found, skipping LSTM forecaster.")
+
         # 8. Save Outputs
         logger.info("Saving core results to parquet...")
         
