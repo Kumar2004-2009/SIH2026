@@ -1,0 +1,110 @@
+{
+  "frontier_points": [
+    {
+      "budget_usd": 228250.0,
+      "risk_reduction_usd": 750787117.1911907,
+      "residual_eal_usd": 345238738.4822502,
+      "n_actions": 16,
+      "utilization_pct": 99.89,
+      "greedy_risk_reduction_usd": 569348023.1644585
+    },
+    {
+      "budget_usd": 456500.0,
+      "risk_reduction_usd": 925759879.8542482,
+      "residual_eal_usd": 170265975.81919274,
+      "n_actions": 27,
+      "utilization_pct": 99.89,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 1141250.0,
+      "risk_reduction_usd": 1028948610.0860814,
+      "residual_eal_usd": 67077245.5873596,
+      "n_actions": 31,
+      "utilization_pct": 99.98,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 2282500.0,
+      "risk_reduction_usd": 1032123774.832716,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 57.22,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 3423750.0,
+      "risk_reduction_usd": 1032123774.8327162,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 45.16,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 4565000.0,
+      "risk_reduction_usd": 1032123774.8327161,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 37.74,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 6847500.0,
+      "risk_reduction_usd": 1032123774.8327159,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 28.58,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 9130000.0,
+      "risk_reduction_usd": 1032123774.832716,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 24.36,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 11412500.0,
+      "risk_reduction_usd": 1032123774.832716,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 22.88,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 13695000.0,
+      "risk_reduction_usd": 1032123774.8327159,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 18.25,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 17118750.0,
+      "risk_reduction_usd": 1032123774.8327159,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 16.59,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 20542500.0,
+      "risk_reduction_usd": 1032123774.8327159,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 14.07,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    },
+    {
+      "budget_usd": 22825000.0,
+      "risk_reduction_usd": 1032123774.8327161,
+      "residual_eal_usd": 63902080.84072497,
+      "n_actions": 31,
+      "utilization_pct": 8.94,
+      "greedy_risk_reduction_usd": 579359733.3306327
+    }
+  ],
+  "knee_point_index": 2,
+  "max_possible_budget": 22825000.0
+}

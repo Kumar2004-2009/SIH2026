@@ -138,6 +138,16 @@ class RiskPipeline:
         aggregates["org_risk_summary"].to_parquet(out_dir / "org_risk_summary.parquet", index=False)
         scenario_results.to_parquet(out_dir / "control_scenario_results.parquet", index=False)
         
+        # Precompute efficient frontier cache for sub-millisecond API responses
+        try:
+            from .frontier import compute_frontier
+            frontier_data = compute_frontier(scenario_results)
+            with open(out_dir / "frontier_cache.json", "w") as f:
+                json.dump(frontier_data, f, indent=2)
+            logger.info("Precomputed efficient frontier cache saved.")
+        except Exception as e:
+            logger.warning(f"Could not precompute frontier cache: {e}")
+        
         # For full traceability, optionally save the complete df
         # df.to_parquet(out_dir / "full_simulation_base.parquet", index=False)
         

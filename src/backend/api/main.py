@@ -247,12 +247,35 @@ def get_compliance_gaps_endpoint():
 # Investment Efficient Frontier Endpoint
 # ---------------------------------------------------------------------------
 
+_frontier_cache = None
+
 @app.get("/controls/frontier")
 def get_investment_frontier():
-    """Returns the efficient frontier data — optimizer results at multiple budget levels."""
+    """Returns the efficient frontier data — optimizer results at multiple budget levels (cached)."""
+    global _frontier_cache
+    if _frontier_cache is not None:
+        return _frontier_cache
+
+    cache_file = OUTPUT_DIR / "frontier_cache.json"
+    if cache_file.exists():
+        try:
+            import json
+            with open(cache_file, "r") as f:
+                _frontier_cache = json.load(f)
+            return _frontier_cache
+        except Exception as e:
+            logger.warning(f"Error reading frontier cache: {e}")
+
     try:
         scenarios = load_parquet("control_scenario_results.parquet")
         frontier = compute_frontier(scenarios)
+        _frontier_cache = frontier
+        try:
+            import json
+            with open(cache_file, "w") as f:
+                json.dump(frontier, f)
+        except Exception:
+            pass
         return frontier
     except Exception as e:
         _handle_load_error(e)
