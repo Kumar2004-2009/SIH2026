@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 import pandas as pd
 
+import json
 from .config import EngineConfig, DEFAULT_CONFIG
 from .ingest import DataIngestor
 from .likelihood import LikelihoodModel
@@ -12,6 +13,7 @@ from .aggregate import RiskAggregator
 from .control_scenarios import ControlScenarios
 from .predictor import VulnerabilityPredictor
 from .trend_generator import generate_risk_trend
+from .threat_forecaster import ThreatSequenceForecaster
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -108,6 +110,22 @@ class RiskPipeline:
         trend_df = generate_risk_trend(aggregates["org_risk_summary"], raw_data, self.config)
         trend_df.to_parquet(out_dir / "risk_trend.parquet", index=False)
         
+        # Phase K: Sequential LSTM Threat Event & Attack Sequence Forecasting
+        logger.info("Phase K: Training sequential LSTM threat event forecaster...")
+        threat_events_data = raw_data.get("threat_events")
+        if not isinstance(threat_events_data, pd.DataFrame):
+            threat_events_data = pd.DataFrame(threat_events_data)
+        
+        if not threat_events_data.empty:
+            forecaster = ThreatSequenceForecaster(window_size=7, forecast_horizon=14)
+            forecast_result = forecaster.train_and_forecast(threat_events_data)
+            forecast_path = out_dir / "threat_forecast.json"
+            with open(forecast_path, "w") as f:
+                json.dump(forecast_result, f, indent=2)
+            logger.info("LSTM threat forecasting completed and saved.")
+        else:
+            logger.info("No threat events telemetry found, skipping LSTM forecaster.")
+
         # 8. Save Outputs
         logger.info("Saving core results to parquet...")
         
@@ -119,6 +137,16 @@ class RiskPipeline:
         aggregates["business_unit_risk_summary"].to_parquet(out_dir / "business_unit_risk_summary.parquet", index=False)
         aggregates["org_risk_summary"].to_parquet(out_dir / "org_risk_summary.parquet", index=False)
         scenario_results.to_parquet(out_dir / "control_scenario_results.parquet", index=False)
+        
+        # Precompute efficient frontier cache for sub-millisecond API responses
+        try:
+            from .frontier import compute_frontier
+            frontier_data = compute_frontier(scenario_results)
+            with open(out_dir / "frontier_cache.json", "w") as f:
+                json.dump(frontier_data, f, indent=2)
+            logger.info("Precomputed efficient frontier cache saved.")
+        except Exception as e:
+            logger.warning(f"Could not precompute frontier cache: {e}")
         
         # For full traceability, optionally save the complete df
         # df.to_parquet(out_dir / "full_simulation_base.parquet", index=False)

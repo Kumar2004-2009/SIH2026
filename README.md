@@ -35,6 +35,7 @@ Users can upload their own enterprise cyber telemetry (5 CSV files, a ZIP bundle
 - **Actuarial Monte Carlo Simulation:** 20,000 iterations per asset using EPSS exploit probabilities, CVSS severity scores, and empirical threat event frequencies derived from historical telemetry.
 - **Financial Risk Metrics:** Computes Expected Annual Loss (EAL), 95%/99% Value at Risk (VaR), and Loss Exceedance Curves (LEC) — at asset, business-unit, and organization level.
 - **AI/ML Vulnerability Exploitation Forecasting:** Supervised machine learning engine combining **Random Forest** and **XGBoost** classifiers trained on 10 telemetry features (CVSS, EPSS 30d/annualized, asset criticality, data sensitivity tiers, deployed control coverage, threat event frequency, vulnerability age, and financial exposure). Evaluated with 5-fold cross-validation, feature importance rankings, and per-CVE exploit probability forecasting.
+- **Sequential Neural Network (LSTM) Threat Telemetry Forecaster:** Deep Recurrent Neural Network (PyTorch 2-layer LSTM) trained on sequential SIEM threat logs to forecast forward multi-period Threat Event Frequency (TEF) trajectories and attack surges with 90% confidence interval bands, coupled with Markovian transition modeling for MITRE ATT&CK kill-chain progression (e.g., Valid Accounts $\rightarrow$ Password Guessing $\rightarrow$ Ransomware).
 - **Multi-Framework Compliance Mapping & Gap Analysis:** Automated cross-mapping of deployed controls to 5 major regulatory and industry standards:
   - **ISO/IEC 27001:2022 Annex A** (Organizational, People, Physical, Technological)
   - **NIST CSF 2.0** (Govern, Identify, Protect, Detect, Respond, Recover)
@@ -55,7 +56,7 @@ Users can upload their own enterprise cyber telemetry (5 CSV files, a ZIP bundle
 
 - **Frontend:** React 18, Vite, TailwindCSS, Recharts, Lucide Icons, Axios, React Router DOM
 - **Backend:** Python 3.10+, FastAPI, Uvicorn, Pydantic, python-multipart (file upload handling)
-- **Machine Learning & Predictive Modeling:** Scikit-learn (Random Forest Classifier, Cross-Validation), XGBoost (Gradient Boosted Trees)
+- **Machine Learning & Predictive Modeling:** Scikit-learn (Random Forest Classifier, Cross-Validation), XGBoost (Gradient Boosted Trees), PyTorch (Sequential 2-layer LSTM Recurrent Neural Network for Threat Event Frequency & MITRE Attack Sequence Forecasting)
 - **Quantitative Engine & Mathematics:** NumPy, SciPy, Pandas, PyArrow (Parquet), PuLP (COIN-OR CBC ILP Solver)
 - **AI / LLM:** Google Gemini API, called from the backend (never exposed to the browser) with the live computed risk data supplied as context for each query
 - **Database:** See note below
@@ -78,6 +79,7 @@ User / Browser
 React Dashboard & Dataset Upload Portal (Vite + Tailwind + Recharts)
       ├── Executive Overview & Risk Trend Visualizer
       ├── Asset Portfolio & ML Exploit Predictor Panel
+      ├── Sequential LSTM Threat Telemetry Forecaster
       ├── Controls ROSI & Investment Frontier Curve
       ├── Multi-Framework Compliance Radar & Gap Remediation
       └── Embedded AI Risk Copilot
@@ -90,6 +92,7 @@ FastAPI Backend (api/main.py)
       ├── /controls/*                  (ROSI rankings & Knapsack ILP optimizer)
       ├── /controls/frontier           (multi-budget investment frontier & knee-point analysis)
       ├── /predictions/vulnerabilities (ML-based RF/XGBoost exploit probability predictions)
+      ├── /predictions/threat-forecast (Sequential PyTorch LSTM threat frequency & MITRE transitions)
       ├── /compliance/posture          (ISO 27001, NIST CSF, CIS, RBI, SEBI posture scores)
       ├── /compliance/gaps             (framework gap analysis & prioritized remediation)
       └── /chat                        (AI Risk Copilot assistant)
@@ -106,8 +109,9 @@ FAIR & ML Quantitative Risk Pipeline (risk_engine/)
   ├── Phase H: Knapsack ILP Investment Optimization (investment_optimizer.py)
   ├── Phase I: Supervised ML Vulnerability Exploitation Modeling (predictor.py)
   ├── Phase J: Multi-Period Risk Trend Synthesis (trend_generator.py)
-  ├── Phase K: Investment Frontier Curve & Elbow Solver (frontier.py)
-  └── Phase L: Regulatory Compliance Matrix Mapping (framework_mapper.py)
+  ├── Phase K: Sequential LSTM Threat Event & Attack Sequence Forecasting (threat_forecaster.py)
+  ├── Phase L: Investment Frontier Curve & Elbow Solver (frontier.py)
+  └── Phase M: Regulatory Compliance Matrix Mapping (framework_mapper.py)
       │
       ▼
 Computed Risk Outputs (Parquet & JSON) → returned to Frontend Dashboard & AI Copilot
@@ -138,6 +142,7 @@ SIH2026/
 │   │   ├── control_scenarios.py       # Before/after control ROSI evaluation
 │   │   ├── investment_optimizer.py    # Knapsack ILP optimization solver
 │   │   ├── predictor.py               # ML Vulnerability Exploit Predictor (RF & XGBoost)
+│   │   ├── threat_forecaster.py       # Sequential PyTorch LSTM Threat Forecaster & MITRE Sequence Engine
 │   │   ├── frontier.py                # Investment Frontier & Knee-Point curve solver
 │   │   ├── trend_generator.py         # Multi-month historical risk trend generator
 │   │   ├── framework_mapper.py        # ISO 27001, NIST CSF, CIS, RBI, SEBI mapper
@@ -147,7 +152,7 @@ SIH2026/
 │   │   └── *.csv                      # 5 standard telemetry CSV inputs
 │   ├── outputs/                       # Computed risk & ML Parquet datasets (gitignored)
 │   ├── tests/                         # Pytest test suite
-│   └── requirements.txt               # Backend Python dependencies (incl. scikit-learn, xgboost)
+│   └── requirements.txt               # Backend Python dependencies (incl. scikit-learn, xgboost, torch)
 ├── src/frontend/                          # React + Vite frontend application
 │   ├── src/
 │   │   ├── api/client.js              # Axios API client & formatters
@@ -155,7 +160,7 @@ SIH2026/
 │   │   ├── hooks/useApi.js            # Custom async data-fetching hook
 │   │   ├── components/
 │   │   │   ├── home/                  # Hero, About, UploadDropzone, ProcessingOverlay
-│   │   │   ├── dashboard/             # ExecutiveSummary, BUChart, AssetTable, Optimizer,
+│   │   │   ├── dashboard/             # ExecutiveSummary, BUChart, AssetTable, Optimizer, LSTMThreatForecast,
 │   │   │   │                          # ComplianceDashboard, InvestmentFrontierChart, RiskTrendChart
 │   │   │   ├── chatbot/               # ChatWidget, ChatWindow, ChatMessage
 │   │   │   ├── layout/                # Header navigation & theme toggle
@@ -228,6 +233,9 @@ The optimizer's concrete asset-to-control action plan, showing exact budget allo
 
 ### 7. AI Risk Copilot
 Conversational assistant with live context access to the organization's quantified risk metrics, predictive scores, and compliance posture, answering natural-language queries about financial cyber risk.
+
+### 8. Sequential LSTM Threat Telemetry Forecaster
+Interactive deep recurrent neural network interface visualizing multi-period forward attack trajectories, 90% uncertainty envelope confidence bands, dynamic Open FAIR™ Threat Event Frequency (TEF) shifts (+15.6% surge modeling), and MITRE ATT&CK Markovian intrusion kill-chain transitions.
 
 ---
 

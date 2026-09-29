@@ -7,7 +7,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 60000,
 });
 
 /**
@@ -178,6 +178,17 @@ export const getRiskTrend = async () => {
  */
 export const getVulnPredictions = async () => {
   const response = await apiClient.get('/predictions/vulnerabilities');
+  return response.data;
+};
+
+/**
+ * Sequential LSTM Threat Event Frequency (TEF) & attack sequence forecast
+ * @param {number} horizonDays - Forecast window in days
+ */
+export const getThreatForecast = async (horizonDays = 14) => {
+  const response = await apiClient.get('/predictions/threat-forecast', {
+    params: { horizon_days: horizonDays },
+  });
   return response.data;
 };
 

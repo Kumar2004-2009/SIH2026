@@ -9,6 +9,7 @@ import {
   Lock,
   ChevronLeft,
   ChevronRight,
+  Cpu,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDataset } from '../../context/DatasetContext';
@@ -16,6 +17,7 @@ import { useDataset } from '../../context/DatasetContext';
 const navItems = [
   { id: 'overview',   label: 'Executive Overview',  icon: BarChart3 },
   { id: 'assets',     label: 'Asset Portfolio',      icon: Server    },
+  { id: 'forecasting',label: 'LSTM Threat Forecast', icon: Cpu       },
   { id: 'graph',      label: 'Systemic Risk',        icon: Share2    },
   { id: 'controls',   label: 'Controls',             icon: Award     },
   { id: 'compliance', label: 'Compliance',           icon: FileCheck },

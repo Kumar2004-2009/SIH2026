@@ -16,6 +16,7 @@ import { InvestmentFrontierChart } from '../components/dashboard/InvestmentFront
 import { LiveThreatFeed } from '../components/dashboard/LiveThreatFeed';
 import { PortfolioLECChart } from '../components/dashboard/PortfolioLECChart';
 import { SystemicRiskGraph } from '../components/dashboard/SystemicRiskGraph';
+import { LSTMThreatForecast } from '../components/dashboard/LSTMThreatForecast';
 import { getOrgRisk, getBusinessUnits, getAssets, getControlsRoi, getRiskTrend, getInvestmentFrontier, getPortfolioLec } from '../api/client';
 import {
   Server,
@@ -181,6 +182,13 @@ export function DashboardPage() {
               onSelectAsset={(id) => setSelectedAssetId(id)}
               selectedAssetId={selectedAssetId}
             />
+          </div>
+        )}
+
+        {/* TAB 2.5: SEQUENTIAL LSTM THREAT EVENT FORECASTING */}
+        {activeTab === 'forecasting' && (
+          <div className="space-y-fluid-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <LSTMThreatForecast />
           </div>
         )}
 
