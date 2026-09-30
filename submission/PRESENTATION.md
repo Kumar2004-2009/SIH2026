@@ -5,7 +5,7 @@ Keep your final SIH presentation in the repository whenever the file size allows
 ## Presentation file
 
 - **Location in repo:** [`submission/CyberRisk_SIH2026_PS26105.pptx`](./CyberRisk_SIH2026_PS26105.pptx)
-- **View Presentation:** [CyberRisk – SIH 2026 Presentation](https://youtu.be/7WWFyT6DtGg)
+- **View Presentation:** [CyberRisk – SIH 2026 Presentation](https://docs.google.com/presentation/d/1mU76mtoaP6jzHIRCLFi07CtqIeqJ1lCu/edit?usp=sharing&ouid=107789024506582723682&rtpof=true&sd=true)
 
 ## Presentation Details
 
